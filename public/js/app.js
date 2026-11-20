@@ -195,8 +195,9 @@
 
     vm.BUILD_COST = 300;
     vm.SCAN_COST = 10; // energy per Scan
-    vm.TELEPORT_COST = 300; // chemicals (flask) to tunnel-warp
-    vm.TELEPORT_TICKS = 1; // always 1 tick, any distance
+    // Teleport: chemicals = squads × 10 × original distance ticks; arrives in 1 tick
+    vm.TELEPORT_COST_PER = 10;
+    vm.TELEPORT_TICKS = 1;
     vm.SQUAD_MAX_UNITS = 15;
     // Combat: base life by fish role
     vm.FISH_HP = { flying: 15, sword: 30, puffer: 60 };
@@ -711,15 +712,45 @@
       vm.teleportTarget = null;
     };
 
+    /** Odd-row offset → cube hex distance (same as map travel). */
+    vm.hexDistance = function (c1, r1, c2, r2) {
+      var col1 = Number(c1);
+      var row1 = Number(r1);
+      var col2 = Number(c2);
+      var row2 = Number(r2);
+      var x1 = col1 - (row1 - (row1 & 1)) / 2;
+      var z1 = row1;
+      var y1 = -x1 - z1;
+      var x2 = col2 - (row2 - (row2 & 1)) / 2;
+      var z2 = row2;
+      var y2 = -x2 - z2;
+      return Math.max(
+        Math.abs(x1 - x2),
+        Math.abs(y1 - y2),
+        Math.abs(z1 - z2)
+      );
+    };
+
+    vm.travelTicksBetween = function (c1, r1, c2, r2) {
+      return Math.max(1, Math.round(vm.hexDistance(c1, r1, c2, r2)));
+    };
+
+    /**
+     * Teleport chemical cost: squads × TELEPORT_COST_PER × original distance ticks.
+     * Example: 5 squads, 3 ticks away → 5 × 10 × 3 = 150.
+     */
+    vm.teleportCost = function (squadCount, distanceTicks) {
+      var n = Math.max(0, Number(squadCount) || 0);
+      var t = Math.max(1, Number(distanceTicks) || 1);
+      return n * (vm.TELEPORT_COST_PER || 10) * t;
+    };
+
     /** Start tunnel-warp aim (curve preview) — like beginTravel, kind stays teleport. */
     vm.beginTeleport = function (squadIds, origin) {
       if (!origin || !squadIds || !squadIds.length) {
         return false;
       }
-      var cost = vm.TELEPORT_COST || 300;
-      if ((vm.getResource('flask') || 0) < cost) {
-        return false;
-      }
+      // Exact cost needs destination distance; afford check happens on confirm
       vm.teleportOpen = false;
       vm.moveOpen = false;
       vm.moveTarget = null;
@@ -739,6 +770,7 @@
       vm.travel.squadIds = squadIds.slice();
       vm.travel.pinned = null;
       vm.travel.ticks = vm.TELEPORT_TICKS || 1;
+      vm.travel.distanceTicks = 0;
       return true;
     };
 
@@ -960,11 +992,24 @@
       var kind;
       var label;
       var ticks;
+      var distanceTicks = 0;
+      var squadN = (vm.travel.squadIds || []).length;
+      var cost = 0;
       if (isTeleport) {
         kind = 'teleport';
         ticks = vm.TELEPORT_TICKS || 1;
+        distanceTicks =
+          dest.distanceTicks ||
+          vm.travelTicksBetween(
+            vm.travel.origin.col,
+            vm.travel.origin.row,
+            dest.col,
+            dest.row
+          );
+        cost = vm.teleportCost(squadN, distanceTicks);
         label = dest.siteLabel || 'Sand Tunnel';
         vm.travel.ticks = ticks;
+        vm.travel.distanceTicks = distanceTicks;
       } else {
         // Blue: own/ally ↔ own/ally. Orange: any neutral/enemy end.
         var originOwner =
@@ -980,8 +1025,10 @@
         kind: kind,
         dest: vm.travel.pinned,
         ticks: ticks,
+        distanceTicks: distanceTicks,
+        squadCount: squadN,
         label: label,
-        cost: kind === 'teleport' ? vm.TELEPORT_COST || 300 : 0,
+        cost: cost,
       };
       vm.travelConfirmOpen = true;
     };
@@ -995,9 +1042,11 @@
         vm.travel.pinned = null;
         if (keepTeleport) {
           vm.travel.ticks = vm.TELEPORT_TICKS || 1;
+          vm.travel.distanceTicks = 0;
           vm.travel.kind = 'teleport';
         } else {
           vm.travel.ticks = 0;
+          vm.travel.distanceTicks = 0;
           vm.travel.kind = null;
         }
       }
@@ -1013,10 +1062,23 @@
       var ticks = Math.max(1, conf.ticks || vm.travel.ticks || 1);
       var destLabel = conf.label || 'destination';
       var destOwner = vm.travel.pinned.owner || null;
-      var teleportCost = vm.TELEPORT_COST || 300;
-      // Teleport: spend chemicals as fuel before committing
+      var distanceTicks;
+      var teleportCost;
+      // Teleport: spend chemicals = squads × 10 × original ticks; arrive in 1 tick
       if (conf.kind === 'teleport') {
         ticks = vm.TELEPORT_TICKS || 1;
+        distanceTicks =
+          conf.distanceTicks ||
+          vm.travel.distanceTicks ||
+          vm.travelTicksBetween(
+            vm.travel.origin.col,
+            vm.travel.origin.row,
+            vm.travel.pinned.col,
+            vm.travel.pinned.row
+          );
+        teleportCost = vm.teleportCost(ids.length, distanceTicks);
+        conf.cost = teleportCost;
+        conf.distanceTicks = distanceTicks;
         if (
           !vm.spendResources ||
           !vm.spendResources({ flask: teleportCost })
@@ -2418,9 +2480,22 @@
     vm.status = '';
     vm.selected = {};
 
+    /** Preview min cost (1-tick distance) until destination is pinned. */
     vm.cost = function () {
       var game = getGame();
-      return (game && game.TELEPORT_COST) || 300;
+      var n = vm.selectedIds().length;
+      if (!n) {
+        return 0;
+      }
+      if (game && typeof game.teleportCost === 'function') {
+        return game.teleportCost(n, 1);
+      }
+      return n * ((game && game.TELEPORT_COST_PER) || 10);
+    };
+
+    vm.costPer = function () {
+      var game = getGame();
+      return (game && game.TELEPORT_COST_PER) || 10;
     };
 
     vm.ticks = function () {
@@ -2488,9 +2563,9 @@
       return ids;
     };
 
-    /** Enabled only with squads selected and enough chemicals. */
+    /** Enabled with squads selected — final afford check is at confirm. */
     vm.canTeleport = function () {
-      return vm.selectedIds().length > 0 && vm.chemicals() >= vm.cost();
+      return vm.selectedIds().length > 0;
     };
 
     vm.teleport = function () {
@@ -2500,15 +2575,11 @@
         vm.status = 'Select at least one squad.';
         return;
       }
-      if (vm.chemicals() < vm.cost()) {
-        vm.status = 'Need ' + vm.cost() + ' chemicals to teleport.';
-        return;
-      }
       if (!game || !game.teleportTarget || !game.beginTeleport) {
         return;
       }
       if (!game.beginTeleport(ids, game.teleportTarget)) {
-        vm.status = 'Need ' + vm.cost() + ' chemicals to teleport.';
+        vm.status = 'Could not start teleport aim.';
         return;
       }
       vm.selected = {};
@@ -4338,17 +4409,24 @@
           ) {
             return;
           }
+          var distanceTicks = travelTicksFor(
+            travel.origin.col,
+            travel.origin.row,
+            dest.col,
+            dest.row
+          );
           var ticks =
             travel.kind === 'teleport'
               ? s.game.TELEPORT_TICKS || 1
-              : travelTicksFor(
-                  travel.origin.col,
-                  travel.origin.row,
-                  dest.col,
-                  dest.row
-                );
+              : distanceTicks;
+          if (travel.kind === 'teleport') {
+            dest.distanceTicks = distanceTicks;
+          }
           s.$applyAsync(function () {
             s.game.travel.ticks = ticks;
+            if (travel.kind === 'teleport') {
+              s.game.travel.distanceTicks = distanceTicks;
+            }
             s.game.pinTravelDestination(dest);
           });
           drawTravelCurve(left + hexW / 2, top + hexH / 2, ticks);

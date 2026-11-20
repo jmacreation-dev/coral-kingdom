@@ -650,8 +650,10 @@
                 </p>
                 <p class="move-hint" ng-if="game.travelConfirm.kind === 'teleport'">
                   Teleport to <strong>{{game.travelConfirm.label}}</strong>?
-                  Costs <strong>{{game.travelConfirm.cost || 300}}</strong> chemicals ·
-                  <strong>{{game.travelConfirm.ticks}}</strong> tick.
+                  Costs <strong>{{game.travelConfirm.cost}}</strong> chemicals
+                  ({{game.travelConfirm.squadCount}} squads × 10 ×
+                  {{game.travelConfirm.distanceTicks}} ticks) ·
+                  arrives in <strong>{{game.travelConfirm.ticks}}</strong> tick.
                 </p>
                 <p
                   class="squad-status"
@@ -673,7 +675,7 @@
                       'move-travel-btn--teleport': game.travelConfirm.kind === 'teleport'
                     }"
                     ng-click="game.confirmTravel()"
-                    ng-disabled="game.travelConfirm.kind === 'teleport' && game.getResource('flask') < (game.travelConfirm.cost || 300)"
+                    ng-disabled="game.travelConfirm.kind === 'teleport' && game.getResource('flask') < (game.travelConfirm.cost || 0)"
                   >
                     {{game.travelConfirm.kind === 'attack'
                       ? 'Confirm Attack'
@@ -786,9 +788,10 @@
               <div class="move-body">
                 <p class="move-hint">
                   Squads idle on <strong>{{teleport.siteLabel()}}</strong>.
-                  Teleport costs <strong>{{teleport.cost()}}</strong> chemicals ·
-                  <strong>{{teleport.ticks()}}</strong> tick
-                  (you have {{teleport.chemicals()}}).
+                  Cost = squads × {{teleport.costPer()}} × distance ticks
+                  (arrives in {{teleport.ticks()}} tick). From
+                  <strong>{{teleport.cost()}}</strong> chemicals with current
+                  selection (1-tick min) — you have {{teleport.chemicals()}}.
                 </p>
                 <ul class="move-list" ng-if="teleport.squads().length">
                   <li
