@@ -1717,8 +1717,8 @@
     };
 
     /**
-     * Radar contacts from live travel routes (your structures only):
-     * - Attacks on your owned structures
+     * Radar contacts from live travel routes:
+     * - Attacks on your owned or ally structures
      * - Ally moves onto your owned structures
      * - Ally squads leaving your structures toward ally structures
      */
@@ -1733,6 +1733,9 @@
       var originLabel;
       var eta;
       var squads;
+      function mineOrAlly(m) {
+        return m === 'own' || m === 'ally';
+      }
       for (i = 0; i < routes.length; i += 1) {
         r = routes[i];
         if (!r || !r.origin || !r.pinned || r.kind === 'teleport') {
@@ -1745,17 +1748,18 @@
         eta = r.ticksLeft != null ? r.ticksLeft : 0;
         squads = r.squadCount || (r.squadIds && r.squadIds.length) || 1;
 
-        // Attacks on your structures only
+        // Attacks on your structures or ally structures
         if (
           r.kind === 'attack' &&
-          dOwner === 'own' &&
-          oOwner !== 'own' &&
-          oOwner !== 'ally'
+          mineOrAlly(dOwner) &&
+          !mineOrAlly(oOwner)
         ) {
           out.push({
             id: r.id + '-atk',
             routeId: r.id,
-            name: 'Attack → ' + destLabel,
+            name:
+              (dOwner === 'ally' ? 'Ally attack → ' : 'Attack → ') +
+              destLabel,
             detail: 'From ' + originLabel,
             side: 'enemy',
             kind: 'attack',
@@ -5889,6 +5893,33 @@
               squadCount: 1,
               ticksTotal: Math.max(ticks, 5),
               ticksLeft: Math.max(ticks, 5),
+              progress: 0,
+              facingDeg: (Math.atan2(dx, -dy) * 180) / Math.PI,
+            });
+          }
+          // Attack on ally → red (enemy reef → ally reef)
+          var atkAllyFrom = cellPt(48, 7);
+          var atkAllyTo = cellPt(45, 4);
+          if (atkAllyFrom && atkAllyTo) {
+            ticks = travelTicksFor(
+              atkAllyFrom.col,
+              atkAllyFrom.row,
+              atkAllyTo.col,
+              atkAllyTo.row
+            );
+            dx = atkAllyTo.left - atkAllyFrom.left;
+            dy = atkAllyTo.top - atkAllyFrom.top;
+            s.game.nextRouteId += 1;
+            s.game.travel.routes.push({
+              id: 'r' + s.game.nextRouteId,
+              kind: 'attack',
+              owned: false,
+              origin: atkAllyFrom,
+              pinned: atkAllyTo,
+              squadIds: [],
+              squadCount: 3,
+              ticksTotal: Math.max(ticks, 6),
+              ticksLeft: Math.max(ticks, 6),
               progress: 0,
               facingDeg: (Math.atan2(dx, -dy) * 180) / Math.PI,
             });
