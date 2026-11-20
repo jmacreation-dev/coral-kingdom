@@ -198,6 +198,14 @@
     vm.TELEPORT_COST = 300; // chemicals (flask) to tunnel-warp
     vm.TELEPORT_TICKS = 1; // always 1 tick, any distance
     vm.SQUAD_MAX_UNITS = 15;
+    // Combat: base life by fish role
+    vm.FISH_HP = { flying: 15, sword: 30, puffer: 60 };
+    // Type chart: armoured < shock < toxic < armoured
+    vm.TYPE_BEATS = {
+      shock: 'armoured',
+      toxic: 'shock',
+      armoured: 'toxic',
+    };
     vm.TICK_RESOURCE = 10;
     vm.TICK_FISH = 1;
     vm.VIP_TICK_BONUS = 10; // extra +10 to every resource per tick when VIP
@@ -1199,6 +1207,365 @@
       clearTravelSelectionSafe();
     };
 
+    function fishHp(fishId) {
+      return vm.FISH_HP[fishId] || 15;
+    }
+
+    function typeMatchup(atkEl, defEl) {
+      if (!atkEl || !defEl || atkEl === defEl) {
+        return 1;
+      }
+      if (vm.TYPE_BEATS[atkEl] === defEl) {
+        return 1.5; // strong vs
+      }
+      if (vm.TYPE_BEATS[defEl] === atkEl) {
+        return 2 / 3; // weak vs
+      }
+      return 1;
+    }
+
+    /** Normalize a squad's unit mix (synthesize from total when missing). */
+    vm.squadUnitMap = function (squad) {
+      var out = {};
+      var key;
+      var n;
+      var left;
+      var fishes;
+      var els;
+      var fi;
+      var ei;
+      var take;
+      if (!squad) {
+        return out;
+      }
+      if (squad.units) {
+        for (key in squad.units) {
+          if (Object.prototype.hasOwnProperty.call(squad.units, key)) {
+            n = Number(squad.units[key]) || 0;
+            if (n > 0) {
+              out[key] = n;
+            }
+          }
+        }
+        return out;
+      }
+      left = Number(squad.total) || 0;
+      fishes = ['flying', 'sword', 'puffer'];
+      els = ['armoured', 'shock', 'toxic'];
+      fi = 0;
+      ei = 0;
+      while (left > 0) {
+        key = fishes[fi % 3] + '-' + els[ei % 3];
+        take = 1;
+        out[key] = (out[key] || 0) + take;
+        left -= 1;
+        fi += 1;
+        ei += 1;
+      }
+      return out;
+    };
+
+    function countUnits(map) {
+      var key;
+      var sum = 0;
+      for (key in map) {
+        if (Object.prototype.hasOwnProperty.call(map, key)) {
+          sum += Number(map[key]) || 0;
+        }
+      }
+      return sum;
+    }
+
+    function expandCombatants(unitMap) {
+      var list = [];
+      var key;
+      var parts;
+      var fish;
+      var el;
+      var n;
+      var i;
+      for (key in unitMap) {
+        if (!Object.prototype.hasOwnProperty.call(unitMap, key)) {
+          continue;
+        }
+        n = Number(unitMap[key]) || 0;
+        parts = String(key).split('-');
+        fish = parts[0];
+        el = parts[1] || 'armoured';
+        for (i = 0; i < n; i += 1) {
+          list.push({
+            fish: fish,
+            element: el,
+            maxHp: fishHp(fish),
+            hp: fishHp(fish),
+          });
+        }
+      }
+      return list;
+    }
+
+    function collapseCombatants(list) {
+      var map = {};
+      var i;
+      var c;
+      var key;
+      for (i = 0; i < list.length; i += 1) {
+        c = list[i];
+        if (!c || c.hp <= 0) {
+          continue;
+        }
+        key = c.fish + '-' + c.element;
+        map[key] = (map[key] || 0) + 1;
+      }
+      return map;
+    }
+
+    /** Garrison fish → mixed defender composition. */
+    function synthesizeGarrisonUnits(garrison) {
+      var map = {};
+      var left = Math.max(0, Number(garrison) || 0);
+      var fishes = ['flying', 'sword', 'puffer'];
+      var els = ['armoured', 'shock', 'toxic'];
+      var i = 0;
+      var key;
+      while (left > 0) {
+        key = fishes[i % 3] + '-' + els[i % 3];
+        map[key] = (map[key] || 0) + 1;
+        left -= 1;
+        i += 1;
+      }
+      return map;
+    }
+
+    /**
+     * Fight until one side is wiped.
+     * Damage per clash ≈ fish life × type matchup (armoured↔shock↔toxic).
+     */
+    vm.resolveCombat = function (atkMap, defMap) {
+      var atk = expandCombatants(atkMap || {});
+      var def = expandCombatants(defMap || {});
+      var aDmg;
+      var dDmg;
+      var a;
+      var d;
+      while (atk.length && def.length) {
+        a = atk[0];
+        d = def[0];
+        aDmg = Math.max(
+          1,
+          Math.round(a.maxHp * typeMatchup(a.element, d.element))
+        );
+        dDmg = Math.max(
+          1,
+          Math.round(d.maxHp * typeMatchup(d.element, a.element))
+        );
+        d.hp -= aDmg;
+        a.hp -= dDmg;
+        if (d.hp <= 0) {
+          def.shift();
+        }
+        if (a.hp <= 0) {
+          atk.shift();
+        }
+      }
+      return {
+        winner: atk.length ? 'attacker' : def.length ? 'defender' : 'draw',
+        attackerUnits: collapseCombatants(atk),
+        defenderUnits: collapseCombatants(def),
+        attackerLeft: atk.length,
+        defenderLeft: def.length,
+      };
+    };
+
+    function applyUnitsToSquad(squad, unitMap) {
+      var total = countUnits(unitMap);
+      squad.units = unitMap;
+      squad.total = total;
+      return total;
+    }
+
+    /**
+     * Attack arrival: fight garrison, conquer on win.
+     * Coral reef win → becomes owned Shell Radar. Survivors stay on cell.
+     */
+    vm.resolveAttackArrival = function (route, arriving) {
+      var info =
+        typeof vm.getStructureAt === 'function'
+          ? vm.getStructureAt(route.pinned.col, route.pinned.row)
+          : null;
+      var label =
+        (info && info.siteLabel) ||
+        (route.pinned && route.pinned.siteLabel) ||
+        'Structure';
+      var buildingId =
+        (info && info.buildingId) ||
+        (route.pinned && route.pinned.buildingId) ||
+        '';
+      var defenderName =
+        (info && info.playerName) ||
+        (route.pinned && route.pinned.owner) ||
+        'Enemy';
+      var garrison =
+        info && info.garrison != null
+          ? Number(info.garrison) || 0
+          : buildingId === 'coral-reef'
+            ? 18
+            : 9;
+      var atkMap = {};
+      var i;
+      var s;
+      var part;
+      var key;
+      var result;
+      var survivors;
+      var won;
+      var newLabel;
+      var body;
+
+      for (i = 0; i < arriving.length; i += 1) {
+        part = vm.squadUnitMap(arriving[i]);
+        for (key in part) {
+          if (Object.prototype.hasOwnProperty.call(part, key)) {
+            atkMap[key] = (atkMap[key] || 0) + part[key];
+          }
+        }
+      }
+
+      result = vm.resolveCombat(atkMap, synthesizeGarrisonUnits(garrison));
+      won = result.winner === 'attacker';
+      survivors = result.attackerUnits;
+
+      // Split survivors back across arriving squads (first squads keep fish)
+      for (i = 0; i < arriving.length; i += 1) {
+        s = arriving[i];
+        if (i === 0) {
+          applyUnitsToSquad(s, survivors);
+        } else {
+          applyUnitsToSquad(s, {});
+        }
+        s.state = 'idle';
+        s.ticks = 0;
+        s.routeId = null;
+        s.col = route.pinned.col;
+        s.row = route.pinned.row;
+        s.destCol = null;
+        s.destRow = null;
+      }
+
+      // Drop wiped squads
+      var arriveIds = {};
+      for (i = 0; i < arriving.length; i += 1) {
+        if (arriving[i] && arriving[i].id) {
+          arriveIds[arriving[i].id] = true;
+        }
+      }
+      vm.squads = (vm.squads || []).filter(function (sq) {
+        if (!sq || !arriveIds[sq.id]) {
+          return true;
+        }
+        return !!(sq.total && sq.total > 0);
+      });
+
+      if (won) {
+        newLabel = label;
+        if (typeof vm.conquerStructure === 'function') {
+          newLabel =
+            vm.conquerStructure(route.pinned.col, route.pinned.row) ||
+            label;
+        }
+        // Survivors remain idle on the conquered cell
+        for (i = 0; i < arriving.length; i += 1) {
+          s = arriving[i];
+          if (s && s.total > 0) {
+            s.location = newLabel;
+            s.destination = null;
+          }
+        }
+        if (
+          typeof vm.setStructureGarrison === 'function' &&
+          result.attackerLeft > 0
+        ) {
+          vm.setStructureGarrison(
+            route.pinned.col,
+            route.pinned.row,
+            result.attackerLeft
+          );
+        }
+        if (info) {
+          info.siteLabel = newLabel;
+        }
+        body =
+          'Battle Report\n\n' +
+          'Attacker: ' +
+          ((vm.captain && vm.captain.name) || 'You') +
+          '\n' +
+          'Defender: ' +
+          defenderName +
+          '\n' +
+          'Territory: ' +
+          label +
+          '\n\n' +
+          'Outcome: Conquered.\n' +
+          (buildingId === 'coral-reef'
+            ? 'Coral Reef converted to owned Shell Radar.\n'
+            : 'Structure now under your control.\n') +
+          'Survivors: ' +
+          result.attackerLeft +
+          ' fish remain on site.\n' +
+          'Matchup: Armoured < Shock < Toxic < Armoured\n' +
+          'Life: Flying 15 · Sword 30 · Puffer 60';
+        AlertStore.add({
+          kind: 'battle',
+          title: label + ' conquered',
+          preview: 'You conquered ' + label + ' from ' + defenderName,
+          reportTitle: 'Battle Report — ' + label,
+          reportBody: body,
+        });
+        vm.notifications = (vm.notifications || 0) + 1;
+      } else {
+        body =
+          'Battle Report\n\n' +
+          'Attacker: ' +
+          ((vm.captain && vm.captain.name) || 'You') +
+          '\n' +
+          'Defender: ' +
+          defenderName +
+          '\n' +
+          'Territory: ' +
+          label +
+          '\n\n' +
+          'Outcome: Attack failed.\n' +
+          'Defenders remaining: ' +
+          result.defenderLeft +
+          '\n' +
+          'Your survivors: ' +
+          result.attackerLeft +
+          ' (still at ' +
+          label +
+          ').';
+        AlertStore.add({
+          kind: 'battle',
+          title: 'Attack on ' + label + ' failed',
+          preview: 'Your assault on ' + label + ' was repelled',
+          reportTitle: 'Battle Report — ' + label,
+          reportBody: body,
+        });
+        vm.notifications = (vm.notifications || 0) + 1;
+        // Update visible garrison if defenders remain
+        if (
+          typeof vm.setStructureGarrison === 'function' &&
+          result.defenderLeft >= 0
+        ) {
+          vm.setStructureGarrison(
+            route.pinned.col,
+            route.pinned.row,
+            result.defenderLeft
+          );
+        }
+      }
+      return result;
+    };
+
     /** Advance every committed route one tick. */
     vm.advanceTravel = function () {
       if (!vm.travel || !vm.travel.routes || !vm.travel.routes.length) {
@@ -1212,6 +1579,7 @@
       var j;
       var s;
       var total;
+      var arriving;
       for (ri = 0; ri < vm.travel.routes.length; ri += 1) {
         r = vm.travel.routes[ri];
         total = r.ticksTotal || 1;
@@ -1230,19 +1598,29 @@
           }
         }
         if (r.ticksLeft <= 0) {
+          arriving = [];
           for (i = 0; i < ids.length; i += 1) {
             for (j = 0; j < vm.squads.length; j += 1) {
               s = vm.squads[j];
               if (s && s.id === ids[i]) {
-                s.state = 'idle';
-                s.ticks = 0;
-                s.routeId = null;
-                s.col = r.pinned.col;
-                s.row = r.pinned.row;
-                s.location =
-                  r.pinned.siteLabel || s.destination || s.location;
+                arriving.push(s);
                 break;
               }
+            }
+          }
+          if (r.kind === 'attack') {
+            vm.resolveAttackArrival(r, arriving);
+          } else {
+            for (i = 0; i < arriving.length; i += 1) {
+              s = arriving[i];
+              s.state = 'idle';
+              s.ticks = 0;
+              s.routeId = null;
+              s.col = r.pinned.col;
+              s.row = r.pinned.row;
+              s.location =
+                r.pinned.siteLabel || s.destination || s.location;
+              s.destination = null;
             }
           }
         } else {
@@ -5223,6 +5601,158 @@
             }
             setStructureMark(hexEl, mark);
             return true;
+          };
+          gameScope.game.getStructureAt = function (col, row) {
+            var key = String(col) + ',' + String(row);
+            var hexEl = cellIndex[key];
+            var g;
+            if (!hexEl || !hexEl.getAttribute('data-building')) {
+              return null;
+            }
+            g = parseInt(hexEl.getAttribute('data-garrison') || '0', 10);
+            return {
+              col: hexEl.getAttribute('data-col'),
+              row: hexEl.getAttribute('data-row'),
+              left: parseFloat(hexEl.style.left) || 0,
+              top: parseFloat(hexEl.style.top) || 0,
+              buildingId: hexEl.getAttribute('data-building') || '',
+              owner: hexEl.getAttribute('data-owner') || null,
+              siteLabel: hexEl.getAttribute('data-site-label') || '',
+              playerName: hexEl.getAttribute('data-player-name') || '',
+              garrison: !isNaN(g) ? g : 0,
+            };
+          };
+          gameScope.game.setStructureGarrison = function (col, row, count) {
+            var key = String(col) + ',' + String(row);
+            var hexEl = cellIndex[key];
+            if (!hexEl) {
+              return false;
+            }
+            hexEl.setAttribute(
+              'data-garrison',
+              String(Math.max(0, Number(count) || 0))
+            );
+            return true;
+          };
+          /**
+           * After a winning attack: claim the cell.
+           * Coral reef → owned Shell Radar; other buildings → owned mark.
+           * Returns the new site label.
+           */
+          gameScope.game.conquerStructure = function (col, row) {
+            var key = String(col) + ',' + String(row);
+            var hexEl = cellIndex[key];
+            var buildingId;
+            var structure;
+            var nameEl;
+            var marker;
+            var siteLabel;
+            var i;
+            if (!hexEl || !hexEl.getAttribute('data-building')) {
+              return '';
+            }
+            buildingId = hexEl.getAttribute('data-building') || '';
+            structure = grid.querySelector(
+              '.hex-structure[data-col="' +
+                col +
+                '"][data-row="' +
+                row +
+                '"]'
+            );
+            if (buildingId === 'coral-reef') {
+              // Defeated reef becomes an owned Shell Radar
+              siteCounters['shell-radar'] =
+                (siteCounters['shell-radar'] || 0) + 1;
+              siteLabel =
+                SITE_NAME_PREFIX['shell-radar'] +
+                ' ' +
+                siteCounters['shell-radar'];
+              hexEl.setAttribute('data-building', 'shell-radar');
+              hexEl.removeAttribute('data-player-name');
+              hexEl.removeAttribute('data-vip');
+              hexEl.removeAttribute('data-garrison');
+              hexEl.setAttribute('data-site-label', siteLabel);
+              // Own reef home for this structure is the player's reef
+              var ownReef = firstCoralReefForOwner('own');
+              if (ownReef) {
+                hexEl.setAttribute('data-owner-reef-col', ownReef.col);
+                hexEl.setAttribute('data-owner-reef-row', ownReef.row);
+              }
+              if (structure) {
+                structure.className =
+                  'hex-structure hex-structure--shell-radar hex-structure--own';
+                structure.setAttribute('data-owner', 'own');
+                if (ownReef) {
+                  structure.setAttribute(
+                    'data-owner-reef-col',
+                    ownReef.col
+                  );
+                  structure.setAttribute(
+                    'data-owner-reef-row',
+                    ownReef.row
+                  );
+                }
+                marker = structure.querySelector('.hex-building');
+                if (marker) {
+                  marker.className = 'hex-building hex-building--shell-radar';
+                }
+                nameEl = structure.querySelector('.hex-structure__name');
+                if (nameEl) {
+                  nameEl.className = 'hex-structure__name';
+                  nameEl.textContent = siteLabel;
+                }
+              }
+              applyMarkToCell(hexEl, 'own');
+              // Claim former empire structures linked to this reef
+              var linked = grid.querySelectorAll(
+                '.hex[data-owner-reef-col="' +
+                  String(col) +
+                  '"][data-owner-reef-row="' +
+                  String(row) +
+                  '"]'
+              );
+              var linkEl;
+              var linkKey;
+              for (i = 0; i < linked.length; i += 1) {
+                linkEl = linked[i];
+                linkKey =
+                  linkEl.getAttribute('data-col') +
+                  ',' +
+                  linkEl.getAttribute('data-row');
+                if (linkKey === key) {
+                  continue;
+                }
+                linkEl.removeAttribute('data-garrison');
+                if (ownReef) {
+                  linkEl.setAttribute('data-owner-reef-col', ownReef.col);
+                  linkEl.setAttribute('data-owner-reef-row', ownReef.row);
+                }
+                applyMarkToCell(linkEl, 'own');
+              }
+              return siteLabel;
+            }
+            // Non-reef: claim as owned, clear garrison
+            hexEl.removeAttribute('data-garrison');
+            setStructureMark(hexEl, 'own');
+            siteLabel =
+              hexEl.getAttribute('data-site-label') ||
+              SITE_NAME_PREFIX[buildingId] ||
+              buildingId;
+            if (buildingId !== 'coral-reef') {
+              siteCounters[buildingId] = (siteCounters[buildingId] || 0) + 1;
+              siteLabel =
+                (SITE_NAME_PREFIX[buildingId] || buildingId) +
+                ' ' +
+                siteCounters[buildingId];
+              hexEl.setAttribute('data-site-label', siteLabel);
+              if (structure) {
+                nameEl = structure.querySelector('.hex-structure__name');
+                if (nameEl) {
+                  nameEl.textContent = siteLabel;
+                }
+              }
+            }
+            return siteLabel;
           };
           gameScope.game.clearMapSelection = clearHexSelection;
           gameScope.game.clearTravelSelection = function () {
