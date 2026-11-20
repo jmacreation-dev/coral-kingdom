@@ -502,6 +502,40 @@
     vm.moveTarget = null; // { col, row, left, top, buildingId, siteLabel }
     vm.teleportOpen = false;
     vm.teleportTarget = null; // origin sand tunnel cell
+    vm.tutorialOpen = false;
+    vm.tutorialStep = 0;
+    vm.tutorialSteps = [
+      {
+        id: 'resources',
+        title: 'Collect Resources and Daily Rewards',
+        blurb:
+          'Tap the chest and spin for daily loot. Scraps, chemicals, energy, and population fuel your reef empire.',
+      },
+      {
+        id: 'build',
+        title: 'Build Structures',
+        blurb:
+          'Claim empty sand hexes. Raise Shell Radars, Sand Tunnels, and more to expand your territory.',
+      },
+      {
+        id: 'armies',
+        title: 'Build Armies',
+        blurb:
+          'Train Flying Fish, Swordfish, and Pufferfish. Mix Armoured, Shock, and Toxic for the type triangle.',
+      },
+      {
+        id: 'move',
+        title: 'Move armies',
+        blurb:
+          'Blue curves = friendly moves. Orange = neutral. Red = attack enemy. Teleport through Sand Tunnels in 1 tick.',
+      },
+      {
+        id: 'rank',
+        title: 'Rank Up!',
+        blurb:
+          'Grow your score with structures and fish. Climb Current Era rankings and rule the coral kingdom.',
+      },
+    ];
     vm.placeBuilding = null; // set by hexField directive
     vm.listSandTunnels = null; // set by hexField directive
     // Shared squad roster (Squad panel + Move panel)
@@ -712,6 +746,39 @@
       vm.teleportTarget = null;
     };
 
+    vm.openTutorial = function () {
+      closeAllPanels();
+      vm.tutorialStep = 0;
+      vm.tutorialOpen = true;
+    };
+
+    vm.closeTutorial = function () {
+      vm.tutorialOpen = false;
+      vm.tutorialStep = 0;
+    };
+
+    vm.tutorialCurrent = function () {
+      return vm.tutorialSteps[vm.tutorialStep] || vm.tutorialSteps[0];
+    };
+
+    vm.tutorialIsLast = function () {
+      return vm.tutorialStep >= vm.tutorialSteps.length - 1;
+    };
+
+    vm.tutorialNext = function () {
+      if (vm.tutorialIsLast()) {
+        vm.closeTutorial();
+        return;
+      }
+      vm.tutorialStep += 1;
+    };
+
+    vm.tutorialPrev = function () {
+      if (vm.tutorialStep > 0) {
+        vm.tutorialStep -= 1;
+      }
+    };
+
     /** Odd-row offset → cube hex distance (same as map travel). */
     vm.hexDistance = function (c1, r1, c2, r2) {
       var col1 = Number(c1);
@@ -900,23 +967,21 @@
     };
 
     /**
-     * Curve color kind from structure marks:
-     * own/ally ↔ own/ally → move (blue)
-     * any path involving neutral/enemy → attack (orange)
+     * Curve color kind by destination mark:
+     * own / ally → move (blue)
+     * enemy → attack (red)
+     * neutral → neutral (orange)
      */
     vm.travelLineKind = function (originOwner, destOwner) {
-      function friendly(m) {
-        return m === 'own' || m === 'ally';
-      }
-      var o = originOwner || 'own';
       var d = destOwner || null;
-      if (!d) {
-        return 'move';
+      if (d === 'enemy') {
+        return 'attack';
       }
-      if (friendly(o) && friendly(d)) {
-        return 'move';
+      if (d === 'neutral') {
+        return 'neutral';
       }
-      return 'attack';
+      // own, ally, or unknown → blue move
+      return 'move';
     };
 
     vm.beginTravel = function (squadIds, origin) {
@@ -1018,7 +1083,11 @@
         ticks = vm.travel.ticks || 0;
         label =
           dest.siteLabel ||
-          (kind === 'attack' ? 'hostile structure' : 'structure');
+          (kind === 'attack'
+            ? 'hostile structure'
+            : kind === 'neutral'
+              ? 'neutral structure'
+              : 'structure');
       }
       vm.travel.kind = kind;
       vm.travelConfirm = {
@@ -1088,10 +1157,10 @@
           return;
         }
       }
-      // Moving onto neutral/enemy auto-flags that owner as enemy (attack)
+      // Enemy destination → red attack route (mark enemy)
       if (
         conf.kind !== 'teleport' &&
-        (destOwner === 'neutral' || destOwner === 'enemy') &&
+        destOwner === 'enemy' &&
         typeof vm.markStructureOwner === 'function'
       ) {
         vm.markStructureOwner(
@@ -1102,6 +1171,10 @@
         vm.travel.pinned.owner = 'enemy';
         conf.kind = 'attack';
         vm.travel.kind = 'attack';
+      }
+      // Neutral stays orange (kind 'neutral'); combat still resolves on arrival
+      if (conf.kind === 'neutral') {
+        vm.travel.kind = 'neutral';
       }
       var ox = vm.travel.origin.left;
       var oy = vm.travel.origin.top;
@@ -1238,7 +1311,7 @@
       var dx = route.pinned.left - route.origin.left;
       var dy = route.pinned.top - route.origin.top;
       route.facingDeg = (Math.atan2(dx, -dy) * 180) / Math.PI;
-      // Keep teleport; otherwise blue (friendly↔friendly) or orange (neutral/enemy)
+      // Keep teleport; otherwise blue / orange / red by destination mark
       if (route.kind !== 'teleport') {
         route.kind = vm.travelLineKind(
           route.origin.owner,
@@ -1247,7 +1320,11 @@
       }
       var destLabel =
         route.pinned.siteLabel ||
-        (route.kind === 'attack' ? 'hostile structure' : 'structure');
+        (route.kind === 'attack'
+          ? 'hostile structure'
+          : route.kind === 'neutral'
+            ? 'neutral structure'
+            : 'structure');
       var ids = route.squadIds || [];
       var j;
       var s;
@@ -1670,7 +1747,7 @@
               }
             }
           }
-          if (r.kind === 'attack') {
+          if (r.kind === 'attack' || r.kind === 'neutral') {
             vm.resolveAttackArrival(r, arriving);
           } else {
             for (i = 0; i < arriving.length; i += 1) {
@@ -1732,6 +1809,7 @@
       vm.moveTarget = null;
       vm.teleportOpen = false;
       vm.teleportTarget = null;
+      vm.tutorialOpen = false;
       // Travel confirm stays tied to map travel — only clear via dismiss/confirm
     }
 
@@ -3971,6 +4049,7 @@
             travelPath.setAttribute('d', '');
             travelPath.classList.remove(
               'is-attack',
+              'is-neutral',
               'is-move',
               'is-teleport',
               'is-committed'
@@ -4172,9 +4251,11 @@
             'hex-travel-path is-committed' +
               (route.kind === 'attack'
                 ? ' is-attack'
-                : route.kind === 'teleport'
-                  ? ' is-teleport'
-                  : ' is-move')
+                : route.kind === 'neutral'
+                  ? ' is-neutral'
+                  : route.kind === 'teleport'
+                    ? ' is-teleport'
+                    : ' is-move')
           );
           travelRoutesG.appendChild(path);
 
@@ -4285,9 +4366,16 @@
             if (travelPath) {
               travelPath.setAttribute('d', curve.d);
               travelPath.classList.remove('is-committed');
-              travelPath.classList.remove('is-attack', 'is-move', 'is-teleport');
+              travelPath.classList.remove(
+                'is-attack',
+                'is-neutral',
+                'is-move',
+                'is-teleport'
+              );
               if (travel.kind === 'attack') {
                 travelPath.classList.add('is-attack');
+              } else if (travel.kind === 'neutral') {
+                travelPath.classList.add('is-neutral');
               } else if (travel.kind === 'teleport') {
                 travelPath.classList.add('is-teleport');
               } else if (travel.kind === 'move') {

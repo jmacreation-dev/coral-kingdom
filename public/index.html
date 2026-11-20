@@ -329,6 +329,15 @@
         <aside class="side-col side-col--right">
           <button
             type="button"
+            class="side-btn side-btn--help"
+            aria-label="Tutorial help"
+            ng-click="game.openTutorial()"
+          >
+            <span class="side-help-mark" aria-hidden="true">?</span>
+          </button>
+
+          <button
+            type="button"
             class="side-btn"
             aria-label="Rewards"
             ng-click="game.openRewards()"
@@ -625,9 +634,11 @@
                 <h2 class="msg-title">
                   {{game.travelConfirm.kind === 'attack'
                     ? 'Attack'
-                    : game.travelConfirm.kind === 'teleport'
-                      ? 'Teleport'
-                      : 'Move'}}
+                    : game.travelConfirm.kind === 'neutral'
+                      ? 'Claim Neutral'
+                      : game.travelConfirm.kind === 'teleport'
+                        ? 'Teleport'
+                        : 'Move'}}
                 </h2>
                 <button
                   type="button"
@@ -642,6 +653,10 @@
                 <p class="move-hint" ng-if="game.travelConfirm.kind === 'attack'">
                   Attack <strong>{{game.travelConfirm.label}}</strong>?
                   This marks them as an enemy.
+                  Travel time: <strong>{{game.travelConfirm.ticks}}</strong> ticks.
+                </p>
+                <p class="move-hint" ng-if="game.travelConfirm.kind === 'neutral'">
+                  Move on neutral <strong>{{game.travelConfirm.label}}</strong>?
                   Travel time: <strong>{{game.travelConfirm.ticks}}</strong> ticks.
                 </p>
                 <p class="move-hint" ng-if="game.travelConfirm.kind === 'move'">
@@ -672,6 +687,7 @@
                     class="move-travel-btn"
                     ng-class="{
                       'move-travel-btn--attack': game.travelConfirm.kind === 'attack',
+                      'move-travel-btn--neutral': game.travelConfirm.kind === 'neutral',
                       'move-travel-btn--teleport': game.travelConfirm.kind === 'teleport'
                     }"
                     ng-click="game.confirmTravel()"
@@ -679,9 +695,11 @@
                   >
                     {{game.travelConfirm.kind === 'attack'
                       ? 'Confirm Attack'
-                      : game.travelConfirm.kind === 'teleport'
-                        ? 'Confirm Teleport'
-                        : 'Confirm Move'}}
+                      : game.travelConfirm.kind === 'neutral'
+                        ? 'Confirm Claim'
+                        : game.travelConfirm.kind === 'teleport'
+                          ? 'Confirm Teleport'
+                          : 'Confirm Move'}}
                   </button>
                 </div>
               </div>
@@ -1851,6 +1869,146 @@
                     </p>
                   </div>
                 </section>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comic tutorial overlay -->
+        <div
+          class="msg-overlay tutorial-overlay"
+          ng-if="game.tutorialOpen"
+          ng-click="game.closeTutorial()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel tutorial-panel"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Tutorial"
+          >
+            <div class="msg-panel__inner tutorial-panel__inner">
+              <header class="tutorial-header">
+                <span class="tutorial-kicker"
+                  >Guide · {{game.tutorialStep + 1}} /
+                  {{game.tutorialSteps.length}}</span
+                >
+                <button
+                  type="button"
+                  class="tutorial-close"
+                  aria-label="Close tutorial"
+                  ng-click="game.closeTutorial()"
+                >
+                  ×
+                </button>
+              </header>
+
+              <div class="tutorial-comic" aria-hidden="true">
+                <span class="tutorial-comic__burst">POW!</span>
+                <!-- Resources -->
+                <svg
+                  class="tutorial-comic__art"
+                  ng-if="game.tutorialCurrent().id === 'resources'"
+                  viewBox="0 0 280 148"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect x="18" y="28" width="70" height="78" rx="10" fill="#E85A4F" stroke="#162534" stroke-width="4"/>
+                  <rect x="44" y="28" width="18" height="78" fill="#FFD845" stroke="#162534" stroke-width="3"/>
+                  <circle cx="150" cy="74" r="42" fill="#FFD845" stroke="#162534" stroke-width="4"/>
+                  <path d="M150 40 L158 58 L178 58 L162 70 L168 90 L150 78 L132 90 L138 70 L122 58 L142 58 Z" fill="#FFF3C4" stroke="#162534" stroke-width="2"/>
+                  <rect x="210" y="48" width="46" height="52" rx="8" fill="#8FA8B8" stroke="#162534" stroke-width="3"/>
+                  <text x="140" y="138" text-anchor="middle" font-family="Fredoka, Nunito, sans-serif" font-size="14" font-weight="700" fill="#162534">Loot &amp; Daily Spin!</text>
+                </svg>
+                <!-- Build -->
+                <svg
+                  class="tutorial-comic__art"
+                  ng-if="game.tutorialCurrent().id === 'build'"
+                  viewBox="0 0 280 148"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M40 110 L70 58 L100 110 Z" fill="#3a9aaa" stroke="#162534" stroke-width="4"/>
+                  <path d="M110 110 L150 40 L190 110 Z" fill="#c4a06a" stroke="#162534" stroke-width="4"/>
+                  <rect x="200" y="70" width="52" height="40" rx="6" fill="#4a8ec8" stroke="#162534" stroke-width="4"/>
+                  <circle cx="226" cy="78" r="8" fill="#7fd4de" stroke="#162534" stroke-width="2"/>
+                  <text x="140" y="138" text-anchor="middle" font-family="Fredoka, Nunito, sans-serif" font-size="14" font-weight="700" fill="#162534">Raise the reef!</text>
+                </svg>
+                <!-- Armies -->
+                <svg
+                  class="tutorial-comic__art"
+                  ng-if="game.tutorialCurrent().id === 'armies'"
+                  viewBox="0 0 280 148"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <ellipse cx="70" cy="78" rx="36" ry="22" fill="#7fd4de" stroke="#162534" stroke-width="3"/>
+                  <path d="M100 70 L130 58 L118 82 Z" fill="#5DADE2" stroke="#162534" stroke-width="2"/>
+                  <ellipse cx="150" cy="86" rx="40" ry="18" fill="#4a8ec8" stroke="#162534" stroke-width="3"/>
+                  <path d="M185 80 L220 62 L210 92 Z" fill="#2a6088" stroke="#162534" stroke-width="2"/>
+                  <circle cx="230" cy="78" r="26" fill="#9b5bb8" stroke="#162534" stroke-width="3"/>
+                  <circle cx="222" cy="72" r="4" fill="#fff"/><circle cx="238" cy="72" r="4" fill="#fff"/>
+                  <text x="140" y="138" text-anchor="middle" font-family="Fredoka, Nunito, sans-serif" font-size="14" font-weight="700" fill="#162534">Train your squad!</text>
+                </svg>
+                <!-- Move -->
+                <svg
+                  class="tutorial-comic__art"
+                  ng-if="game.tutorialCurrent().id === 'move'"
+                  viewBox="0 0 280 148"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M30 100 Q90 30 150 70 T250 50" fill="none" stroke="#3aa8ff" stroke-width="6" stroke-dasharray="10 7" stroke-linecap="round"/>
+                  <path d="M30 118 Q100 70 160 95 T250 80" fill="none" stroke="#f0a020" stroke-width="5" stroke-dasharray="10 7" stroke-linecap="round"/>
+                  <path d="M30 132 Q110 100 170 115 T250 105" fill="none" stroke="#e23b3b" stroke-width="5" stroke-dasharray="10 7" stroke-linecap="round"/>
+                  <circle cx="40" cy="100" r="10" fill="#3a9aaa" stroke="#162534" stroke-width="3"/>
+                  <circle cx="250" cy="50" r="10" fill="#3a9aaa" stroke="#162534" stroke-width="3"/>
+                  <text x="140" y="30" text-anchor="middle" font-family="Fredoka, Nunito, sans-serif" font-size="13" font-weight="700" fill="#162534">Blue · Orange · Red</text>
+                </svg>
+                <!-- Rank -->
+                <svg
+                  class="tutorial-comic__art"
+                  ng-if="game.tutorialCurrent().id === 'rank'"
+                  viewBox="0 0 280 148"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect x="50" y="70" width="40" height="50" fill="#8FA8B8" stroke="#162534" stroke-width="3"/>
+                  <rect x="110" y="40" width="50" height="80" fill="#FFD845" stroke="#162534" stroke-width="3"/>
+                  <rect x="180" y="58" width="44" height="62" fill="#c4a06a" stroke="#162534" stroke-width="3"/>
+                  <path d="M126 28 L135 48 L156 48 L139 60 L146 80 L126 68 L106 80 L113 60 L96 48 L117 48 Z" fill="#FFF3C4" stroke="#162534" stroke-width="2"/>
+                  <text x="140" y="138" text-anchor="middle" font-family="Fredoka, Nunito, sans-serif" font-size="14" font-weight="700" fill="#162534">Climb the ranks!</text>
+                </svg>
+              </div>
+
+              <div class="tutorial-body">
+                <h2 class="tutorial-title">{{game.tutorialCurrent().title}}</h2>
+                <p class="tutorial-blurb">{{game.tutorialCurrent().blurb}}</p>
+              </div>
+
+              <div class="tutorial-dots" role="tablist" aria-label="Tutorial steps">
+                <button
+                  type="button"
+                  class="tutorial-dot"
+                  ng-repeat="step in game.tutorialSteps track by step.id"
+                  ng-class="{'is-on': $index === game.tutorialStep}"
+                  ng-click="game.tutorialStep = $index"
+                  aria-label="Step {{$index + 1}}"
+                ></button>
+              </div>
+
+              <div class="tutorial-actions">
+                <button
+                  type="button"
+                  class="tutorial-btn tutorial-btn--ghost"
+                  ng-click="game.tutorialPrev()"
+                  ng-disabled="game.tutorialStep === 0"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  class="tutorial-btn tutorial-btn--next"
+                  ng-click="game.tutorialNext()"
+                >
+                  {{game.tutorialIsLast() ? 'Got it!' : 'Next'}}
+                </button>
               </div>
             </div>
           </div>

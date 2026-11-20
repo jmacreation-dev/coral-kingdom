@@ -161,6 +161,14 @@
       inset 0 1px 0 rgba(255, 220, 220, 0.3);
   }
 
+  &--neutral {
+    background: linear-gradient(180deg, #d09030 0%, #9a6018 100%);
+    border-color: #f0c878;
+    box-shadow:
+      0 0 0 1px #6a4010,
+      inset 0 1px 0 rgba(255, 240, 200, 0.3);
+  }
+
   &--teleport {
     background: linear-gradient(180deg, #6a9a50 0%, #3f6a30 100%);
     border-color: #b8e090;

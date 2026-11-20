@@ -293,16 +293,22 @@
   stroke-dasharray: 10 7;
   filter: drop-shadow(0 0 4px rgba(240, 210, 122, 0.45));
 
-  // Own / ally ↔ own / ally
+  // Own / ally destinations
   &.is-move {
     stroke: #3aa8ff;
     filter: drop-shadow(0 0 4px rgba(58, 168, 255, 0.55));
   }
 
-  // Neutral / enemy involved (either end)
-  &.is-attack {
+  // Neutral destinations
+  &.is-neutral {
     stroke: #f0a020;
     filter: drop-shadow(0 0 4px rgba(240, 160, 32, 0.55));
+  }
+
+  // Enemy attack
+  &.is-attack {
+    stroke: #e23b3b;
+    filter: drop-shadow(0 0 4px rgba(226, 59, 59, 0.55));
   }
 
   // Sand-tunnel teleport
@@ -321,9 +327,14 @@
     filter: drop-shadow(0 0 5px rgba(58, 168, 255, 0.65));
   }
 
-  &.is-committed.is-attack {
+  &.is-committed.is-neutral {
     stroke: #f0a020;
     filter: drop-shadow(0 0 5px rgba(240, 160, 32, 0.65));
+  }
+
+  &.is-committed.is-attack {
+    stroke: #e23b3b;
+    filter: drop-shadow(0 0 5px rgba(226, 59, 59, 0.65));
   }
 
   &.is-committed.is-teleport {
