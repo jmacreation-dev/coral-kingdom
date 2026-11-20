@@ -5640,14 +5640,12 @@
            * Returns the new site label.
            */
           gameScope.game.conquerStructure = function (col, row) {
-            var key = String(col) + ',' + String(row);
-            var hexEl = cellIndex[key];
+            var hexEl = cellIndex[String(col) + ',' + String(row)];
             var buildingId;
             var structure;
             var nameEl;
             var marker;
             var siteLabel;
-            var i;
             if (!hexEl || !hexEl.getAttribute('data-building')) {
               return '';
             }
@@ -5703,32 +5701,7 @@
                 }
               }
               applyMarkToCell(hexEl, 'own');
-              // Claim former empire structures linked to this reef
-              var linked = grid.querySelectorAll(
-                '.hex[data-owner-reef-col="' +
-                  String(col) +
-                  '"][data-owner-reef-row="' +
-                  String(row) +
-                  '"]'
-              );
-              var linkEl;
-              var linkKey;
-              for (i = 0; i < linked.length; i += 1) {
-                linkEl = linked[i];
-                linkKey =
-                  linkEl.getAttribute('data-col') +
-                  ',' +
-                  linkEl.getAttribute('data-row');
-                if (linkKey === key) {
-                  continue;
-                }
-                linkEl.removeAttribute('data-garrison');
-                if (ownReef) {
-                  linkEl.setAttribute('data-owner-reef-col', ownReef.col);
-                  linkEl.setAttribute('data-owner-reef-row', ownReef.row);
-                }
-                applyMarkToCell(linkEl, 'own');
-              }
+              // Other structures linked to this reef stay enemy-owned
               return siteLabel;
             }
             // Non-reef: claim as owned, clear garrison
