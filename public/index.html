@@ -1234,7 +1234,8 @@
               </header>
               <div class="squad-body">
                 <p class="radar-hint">
-                  Attacks on you &amp; allies · Ally moves to ally / your structures
+                  Attacks on your structures · Ally moves to your structures ·
+                  Ally squads leaving your structures for allies
                 </p>
                 <ul class="squad-list" ng-if="radar.contacts().length">
                   <li
@@ -1263,7 +1264,7 @@
                   </li>
                 </ul>
                 <p class="squad-empty" ng-if="!radar.contacts().length">
-                  No attacks or ally moves on radar.
+                  No attacks or ally traffic on your structures.
                 </p>
                 <p class="squad-status" ng-if="radar.status">{{radar.status}}</p>
               </div>

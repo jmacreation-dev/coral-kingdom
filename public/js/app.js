@@ -1717,9 +1717,10 @@
     };
 
     /**
-     * Radar contacts from live travel routes:
-     * - Attacks targeting own or ally structures
-     * - Ally moves to ally or owned structures
+     * Radar contacts from live travel routes (your structures only):
+     * - Attacks on your owned structures
+     * - Ally moves onto your owned structures
+     * - Ally squads leaving your structures toward ally structures
      */
     vm.radarContacts = function () {
       var routes = (vm.travel && vm.travel.routes) || [];
@@ -1732,9 +1733,6 @@
       var originLabel;
       var eta;
       var squads;
-      function mineOrAlly(m) {
-        return m === 'own' || m === 'ally';
-      }
       for (i = 0; i < routes.length; i += 1) {
         r = routes[i];
         if (!r || !r.origin || !r.pinned || r.kind === 'teleport') {
@@ -1747,11 +1745,12 @@
         eta = r.ticksLeft != null ? r.ticksLeft : 0;
         squads = r.squadCount || (r.squadIds && r.squadIds.length) || 1;
 
-        // Attacks on me or my ally (inbound hostile)
+        // Attacks on your structures only
         if (
           r.kind === 'attack' &&
-          mineOrAlly(dOwner) &&
-          !mineOrAlly(oOwner)
+          dOwner === 'own' &&
+          oOwner !== 'own' &&
+          oOwner !== 'ally'
         ) {
           out.push({
             id: r.id + '-atk',
@@ -1768,17 +1767,35 @@
           continue;
         }
 
-        // Ally moving to ally or owned structures
-        if (
-          oOwner === 'ally' &&
-          (dOwner === 'ally' || dOwner === 'own') &&
-          r.kind === 'move'
-        ) {
+        // Ally moving onto your structures
+        if (oOwner === 'ally' && dOwner === 'own' && r.kind === 'move') {
           out.push({
-            id: r.id + '-ally',
+            id: r.id + '-ally-in',
             routeId: r.id,
             name: 'Ally → ' + destLabel,
             detail: 'From ' + originLabel,
+            side: 'ally',
+            kind: 'move',
+            eta: eta,
+            squads: squads,
+            col: r.pinned.col,
+            row: r.pinned.row,
+          });
+          continue;
+        }
+
+        // Ally squad leaving your structures toward ally structures
+        if (
+          oOwner === 'own' &&
+          dOwner === 'ally' &&
+          r.kind === 'move' &&
+          r.owned === false
+        ) {
+          out.push({
+            id: r.id + '-ally-out',
+            routeId: r.id,
+            name: 'Ally → ' + destLabel,
+            detail: 'From your ' + originLabel,
             side: 'ally',
             kind: 'move',
             eta: eta,
@@ -5849,56 +5866,29 @@
               facingDeg: (Math.atan2(dx, -dy) * 180) / Math.PI,
             });
           }
-          // Ally → ally (radar → reef)
-          var allyFrom2 = cellPt(46, 4);
-          var allyToAlly = cellPt(45, 4);
-          if (allyFrom2 && allyToAlly) {
+          // Ally squad leaving your structure toward ally (own tunnel → ally reef)
+          var allyOutFrom = cellPt(51, 5);
+          var allyOutTo = cellPt(45, 4);
+          if (allyOutFrom && allyOutTo) {
             ticks = travelTicksFor(
-              allyFrom2.col,
-              allyFrom2.row,
-              allyToAlly.col,
-              allyToAlly.row
+              allyOutFrom.col,
+              allyOutFrom.row,
+              allyOutTo.col,
+              allyOutTo.row
             );
-            dx = allyToAlly.left - allyFrom2.left;
-            dy = allyToAlly.top - allyFrom2.top;
+            dx = allyOutTo.left - allyOutFrom.left;
+            dy = allyOutTo.top - allyOutFrom.top;
             s.game.nextRouteId += 1;
             s.game.travel.routes.push({
               id: 'r' + s.game.nextRouteId,
               kind: 'move',
               owned: false,
-              origin: allyFrom2,
-              pinned: allyToAlly,
+              origin: allyOutFrom,
+              pinned: allyOutTo,
               squadIds: [],
               squadCount: 1,
-              ticksTotal: Math.max(ticks, 2),
-              ticksLeft: Math.max(ticks, 2),
-              progress: 0,
-              facingDeg: (Math.atan2(dx, -dy) * 180) / Math.PI,
-            });
-          }
-          // Attack on ally → red (enemy reef → ally reef)
-          var atkAllyFrom = cellPt(48, 7);
-          var atkAllyTo = cellPt(45, 4);
-          if (atkAllyFrom && atkAllyTo) {
-            ticks = travelTicksFor(
-              atkAllyFrom.col,
-              atkAllyFrom.row,
-              atkAllyTo.col,
-              atkAllyTo.row
-            );
-            dx = atkAllyTo.left - atkAllyFrom.left;
-            dy = atkAllyTo.top - atkAllyFrom.top;
-            s.game.nextRouteId += 1;
-            s.game.travel.routes.push({
-              id: 'r' + s.game.nextRouteId,
-              kind: 'attack',
-              owned: false,
-              origin: atkAllyFrom,
-              pinned: atkAllyTo,
-              squadIds: [],
-              squadCount: 3,
-              ticksTotal: Math.max(ticks, 6),
-              ticksLeft: Math.max(ticks, 6),
+              ticksTotal: Math.max(ticks, 5),
+              ticksLeft: Math.max(ticks, 5),
               progress: 0,
               facingDeg: (Math.atan2(dx, -dy) * 180) / Math.PI,
             });
