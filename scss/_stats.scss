@@ -1,0 +1,147 @@
+// Player Stats — score + breakdown (structures / fish)
+
+.stats-panel {
+  .msg-panel__inner {
+    max-height: min(70vh, 420px);
+  }
+}
+
+.stats-body {
+  gap: 12px;
+}
+
+.stats-portrait {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.stats-avatar.rank-avatar {
+  width: 64px;
+  height: 64px;
+}
+
+.stats-avatar .rank-avatar__face {
+  width: 46px;
+  height: 46px;
+
+  &::before {
+    width: 16px;
+    height: 16px;
+    margin-left: -8px;
+    top: 8px;
+  }
+
+  &::after {
+    width: 26px;
+    height: 16px;
+    margin-left: -13px;
+    top: 22px;
+  }
+}
+
+.stats-avatar.is-vip .rank-avatar__frame::before {
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+}
+
+.stats-avatar.is-vip .rank-avatar__face {
+  width: 34px;
+  height: 34px;
+}
+
+.stats-player {
+  margin: 0;
+  font-family: $font-display;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff8e8;
+  text-align: center;
+}
+
+.stats-vip-label {
+  margin: 0;
+  font-family: $font-ui;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7ec8ff;
+
+  &--normal {
+    color: rgba(200, 230, 245, 0.55);
+  }
+}
+
+.stats-score {
+  margin: 0;
+  text-align: center;
+  font-family: $font-ui;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(200, 230, 245, 0.75);
+
+  strong {
+    display: block;
+    margin-top: 4px;
+    font-family: $font-display;
+    font-size: 28px;
+    font-weight: 800;
+    color: #ffe566;
+    letter-spacing: 0.02em;
+  }
+}
+
+.stats-breakdown {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stats-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 2px solid rgba(240, 210, 122, 0.45);
+  border-radius: 12px;
+  background: linear-gradient(
+    180deg,
+    rgba(74, 155, 176, 0.28) 0%,
+    rgba(20, 55, 72, 0.42) 100%
+  );
+  box-shadow:
+    0 0 0 1px rgba(139, 90, 43, 0.35),
+    inset 0 1px 0 rgba(255, 240, 200, 0.16);
+}
+
+.stats-row__label {
+  flex: 1;
+  min-width: 0;
+  font-family: $font-display;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff8e8;
+}
+
+.stats-row__meta {
+  flex: 0 0 auto;
+  font-family: $font-ui;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(200, 230, 245, 0.65);
+}
+
+.stats-row__pts {
+  flex: 0 0 auto;
+  font-family: $font-display;
+  font-size: 14px;
+  font-weight: 800;
+  color: #f0d27a;
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,21 @@
+{
+  "name": "coral-kingdom",
+  "version": "0.1.0",
+  "description": "Coral Kingdom mobile game front-end (AngularJS + Express)",
+  "private": true,
+  "scripts": {
+    "build:css": "sass scss/main.scss public/css/main.css --style=expanded --no-source-map",
+    "watch:css": "sass --watch scss/main.scss:public/css/main.css --style=expanded --no-source-map",
+    "start": "npm run build:css && node server/index.js",
+    "dev": "npm run build:css && node server/index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "sass": "^1.83.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

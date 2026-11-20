@@ -1,0 +1,163 @@
+// Alliance panel — members / create / join requests
+
+.alliance-panel {
+  .msg-panel__inner {
+    max-height: 480px;
+  }
+}
+
+.alliance-meta {
+  margin: 0;
+  font-family: $font-ui;
+  font-size: 11px;
+  font-weight: 700;
+  color: #f0d27a;
+}
+
+.alliance-tag {
+  font-family: $font-display;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #ffe566;
+}
+
+.squad-state--role {
+  color: #9ed4f0;
+}
+
+.alliance-section-title {
+  margin: 8px 0 0;
+  font-family: $font-display;
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff8e8;
+}
+
+.alliance-create-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alliance-tag-input {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+  text-align: center;
+  max-width: 88px;
+}
+
+.alliance-row-actions,
+.alliance-join-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+}
+
+.alliance-announce-btn {
+  width: 100%;
+  height: 36px;
+  border: 2px solid #f0d27a;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #4a9bb0 0%, #2f7a90 55%, #256a80 100%);
+  box-shadow:
+    0 0 0 1px #8b5a2b,
+    inset 0 1px 0 rgba(255, 240, 200, 0.35);
+  color: #fff8e8;
+  font-family: $font-display;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+.alliance-announce-body,
+.compose-body {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 160px;
+  padding: 12px 14px;
+  border: 2px solid #f0d27a;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #1a2a38 0%, #121e28 100%);
+  box-shadow:
+    0 0 0 1px #8b5a2b,
+    inset 0 1px 0 rgba(255, 240, 200, 0.2);
+  color: #fff8e8;
+  font-family: $font-display;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  resize: vertical;
+  white-space: pre-wrap;
+  outline: none;
+  box-sizing: border-box;
+
+  &:focus {
+    box-shadow:
+      0 0 0 1px #8b5a2b,
+      0 0 0 3px rgba(74, 155, 176, 0.35),
+      inset 0 1px 0 rgba(255, 240, 200, 0.25);
+  }
+}
+
+.compose-panel {
+  .msg-panel__inner {
+    max-height: min(70vh, 480px);
+  }
+}
+
+.alliance-join-btn {
+  height: 30px;
+  padding: 0 10px;
+  border: 2px solid #f0d27a;
+  border-radius: 999px;
+  font-family: $font-display;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &--ok {
+    background: linear-gradient(180deg, #4aaa70 0%, #2f7a50 100%);
+    color: #fff8e8;
+    box-shadow: 0 0 0 1px #8b5a2b;
+  }
+
+  &--no {
+    background: linear-gradient(180deg, #a05050 0%, #703030 100%);
+    color: #fff8e8;
+    box-shadow: 0 0 0 1px #8b5a2b;
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+.alliance-leave-btn {
+  width: 100%;
+  height: 34px;
+  margin-top: 4px;
+  border: 2px solid rgba(240, 210, 122, 0.45);
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(220, 240, 250, 0.85);
+  font-family: $font-display;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    transform: translateY(1px);
+    background: rgba(20, 55, 72, 0.4);
+  }
+}

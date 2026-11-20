@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="coralKingdom">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0a6b7a" />
+    <title>Coral Kingdom</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Fredoka:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/main.css" />
+  </head>
+  <body ng-controller="GameCtrl as game">
+    <div class="phone-stage">
+      <div class="game-shell">
+        <!-- Water gradient (behind land) -->
+        <div class="water-bg" aria-hidden="true"></div>
+
+        <!-- Top resource header panel (embossed bar + hanging tick trapezoid) -->
+        <header class="resource-bar">
+          <div class="resource-bar__inner">
+            <!-- Scrap -->
+            <div class="resource" title="{{game.resources[0].label}}">
+              <span class="resource-icon resource-icon--scrap" aria-hidden="true">
+                <svg class="ico-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                  <!-- large central shard -->
+                  <path d="M18 10 L42 8 L48 28 L30 40 L14 30 Z" fill="#8FA8B8" stroke="#162534" stroke-width="3.5" stroke-linejoin="round"/>
+                  <path d="M20 13 L39 11 L44 26 L30 36 L17 28 Z" fill="none" stroke="#D5E6F0" stroke-width="1.6" stroke-linejoin="round" opacity="0.9"/>
+                  <path d="M22 28 L40 22 L44 28 L30 37 L18 30 Z" fill="none" stroke="#5E7384" stroke-width="1.4" opacity="0.55"/>
+                  <circle cx="24" cy="18" r="2.1" fill="#162534"/><circle cx="23.4" cy="17.4" r="0.7" fill="#fff"/>
+                  <circle cx="32" cy="16" r="2.1" fill="#162534"/><circle cx="31.4" cy="15.4" r="0.7" fill="#fff"/>
+                  <circle cx="40" cy="18" r="2.1" fill="#162534"/><circle cx="39.4" cy="17.4" r="0.7" fill="#fff"/>
+                  <circle cx="28" cy="26" r="2.1" fill="#162534"/><circle cx="27.4" cy="25.4" r="0.7" fill="#fff"/>
+                  <circle cx="36" cy="28" r="2.1" fill="#162534"/><circle cx="35.4" cy="27.4" r="0.7" fill="#fff"/>
+                  <!-- top-right small square -->
+                  <path d="M46 6 L58 10 L54 22 L42 18 Z" fill="#9BB4C4" stroke="#162534" stroke-width="3.2" stroke-linejoin="round"/>
+                  <path d="M47.5 9 L55 12 L52 19 L45 16 Z" fill="none" stroke="#E4F1F8" stroke-width="1.3"/>
+                  <!-- bottom-left pentagon -->
+                  <path d="M8 34 L22 30 L26 42 L16 52 L6 44 Z" fill="#7E98A8" stroke="#162534" stroke-width="3.2" stroke-linejoin="round"/>
+                  <path d="M10 36 L20 33 L23 41 L16 48 L9 42 Z" fill="none" stroke="#D0E2EC" stroke-width="1.3"/>
+                  <!-- bottom-right oblong -->
+                  <path d="M34 44 L58 38 L60 48 L38 56 Z" fill="#8AA3B4" stroke="#162534" stroke-width="3.2" stroke-linejoin="round"/>
+                  <path d="M37 46 L55 41 L56.5 47 L39 52 Z" fill="none" stroke="#D8EAF2" stroke-width="1.3"/>
+                </svg>
+              </span>
+              <span class="resource-value">{{game.resources[0].value}}</span>
+            </div>
+
+            <!-- Flask -->
+            <div class="resource" title="{{game.resources[1].label}}">
+              <span class="resource-icon resource-icon--flask" aria-hidden="true">
+                <svg class="ico-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                  <g transform="rotate(-18 32 34)">
+                    <!-- cork -->
+                    <rect x="26" y="4" width="12" height="8" rx="1.5" fill="#C59B6D" stroke="#162534" stroke-width="3"/>
+                    <!-- neck -->
+                    <path d="M27 12 H37 V24 H27 Z" fill="#99C2C8" stroke="#162534" stroke-width="3" stroke-linejoin="round"/>
+                    <path d="M29 13 V23" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
+                    <!-- body -->
+                    <path d="M27 24 L14 52 Q12 58 18 58 H46 Q52 58 50 52 L37 24 Z" fill="#99C2C8" stroke="#162534" stroke-width="3.5" stroke-linejoin="round"/>
+                    <!-- liquid (tilted surface) -->
+                    <path d="M18 40 L46 34 L48 52 Q50 56 46 56 H18 Q14 56 16 52 Z" fill="#37FF7E"/>
+                    <ellipse cx="32" cy="44" rx="7" ry="5.5" fill="#2D8E52" opacity="0.55"/>
+                    <!-- bubbles in liquid -->
+                    <circle cx="28" cy="44" r="1.6" fill="#B8FFD0"/>
+                    <circle cx="34" cy="46" r="1.2" fill="#B8FFD0"/>
+                    <circle cx="31" cy="41" r="1" fill="#E8FFE8"/>
+                    <!-- glass highlight -->
+                    <path d="M22 30 L18 48" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.55"/>
+                    <!-- neck bubbles -->
+                    <circle cx="31" cy="18" r="1.4" fill="#B8FFD0" stroke="#162534" stroke-width="0.6"/>
+                    <circle cx="34" cy="21" r="1.1" fill="#B8FFD0" stroke="#162534" stroke-width="0.6"/>
+                    <circle cx="30" cy="22.5" r="0.9" fill="#D4FFE4" stroke="#162534" stroke-width="0.5"/>
+                  </g>
+                </svg>
+              </span>
+              <span class="resource-value">{{game.resources[1].value}}</span>
+            </div>
+
+            <!-- Energy -->
+            <div class="resource" title="{{game.resources[2].label}}">
+              <span class="resource-icon resource-icon--energy" aria-hidden="true">
+                <svg class="ico-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="boltShade" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stop-color="#FBB03B"/>
+                      <stop offset="48%" stop-color="#FBB03B"/>
+                      <stop offset="52%" stop-color="#FFD845"/>
+                      <stop offset="100%" stop-color="#FFD845"/>
+                    </linearGradient>
+                    <radialGradient id="bubbleFill" cx="38%" cy="32%" r="68%">
+                      <stop offset="0%" stop-color="#A8E9FF"/>
+                      <stop offset="55%" stop-color="#76D6FF"/>
+                      <stop offset="100%" stop-color="#47B8EB"/>
+                    </radialGradient>
+                  </defs>
+                  <circle cx="32" cy="32" r="26" fill="url(#bubbleFill)" stroke="#162635" stroke-width="4.5"/>
+                  <!-- gloss highlight -->
+                  <path d="M16 22 Q22 12 36 14" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+                  <circle cx="42" cy="44" r="3.5" fill="#5BBFE0" opacity="0.45"/>
+                  <!-- lightning bolt -->
+                  <path d="M36 10 L22 32 H32 L26 54 L46 28 H34 Z" fill="url(#boltShade)" stroke="#162635" stroke-width="3.2" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span class="resource-value">{{game.resources[2].value}}</span>
+            </div>
+
+            <!-- Fish -->
+            <div class="resource" title="{{game.resources[3].label}}">
+              <span class="resource-icon resource-icon--fish" aria-hidden="true">
+                <svg class="ico-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                  <!-- tail -->
+                  <path d="M4 22 L18 32 L4 42 Z" fill="#FF8C42" stroke="#162534" stroke-width="3.2" stroke-linejoin="round"/>
+                  <path d="M6 34 L16 32 L6 40 Z" fill="#FFCC99" opacity="0.85"/>
+                  <!-- dorsal -->
+                  <path d="M30 6 L40 18 L22 18 Z" fill="#FF8C42" stroke="#162534" stroke-width="3.2" stroke-linejoin="round"/>
+                  <!-- body -->
+                  <circle cx="36" cy="34" r="18" fill="#FF8C42" stroke="#162534" stroke-width="3.5"/>
+                  <!-- peach belly -->
+                  <path d="M19 38 Q36 52 53 38 Q52 50 36 52 Q20 50 19 38 Z" fill="#FFCC99"/>
+                  <!-- body gloss -->
+                  <path d="M24 24 Q28 18 38 20" fill="none" stroke="#FFE0C0" stroke-width="3.5" stroke-linecap="round" opacity="0.75"/>
+                  <!-- pectoral fin -->
+                  <path d="M28 34 L18 30 L20 40 Z" fill="#FF9A55" stroke="#162534" stroke-width="2.4" stroke-linejoin="round"/>
+                  <!-- eye -->
+                  <circle cx="46" cy="30" r="5.5" fill="#fff" stroke="#162534" stroke-width="2.2"/>
+                  <circle cx="47.2" cy="30.4" r="2.6" fill="#162534"/>
+                  <circle cx="46.2" cy="29.2" r="0.9" fill="#fff"/>
+                  <!-- smile -->
+                  <path d="M50 36 Q54 38 52 41" fill="none" stroke="#162534" stroke-width="2.2" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span class="resource-value">{{game.resources[3].value}}</span>
+            </div>
+          </div>
+          <div class="tick-tab">
+            <span class="tick-tab__text">{{game.tickLabel}}</span>
+          </div>
+        </header>
+
+        <!-- Profile + minimap -->
+        <div class="top-corners">
+          <div class="captain">
+            <div class="captain-ring" aria-hidden="true">
+              <!-- Moonblood-style default portrait silhouette (light figure on dark fill) -->
+              <svg class="shadow-man" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="32" cy="32" r="29" fill="#1a2a38"/>
+                <circle cx="32" cy="25.5" r="7.2" fill="#dcdce4"/>
+                <path fill="#dcdce4" d="M18 49.2c2-8.6 7-12.4 14-12.4s12 3.8 14 12.4"/>
+              </svg>
+              <div class="coral-trim coral-trim--l"></div>
+              <div class="coral-trim coral-trim--r"></div>
+            </div>
+            <button
+              type="button"
+              class="captain-nameplate"
+              ng-click="game.openStats()"
+              aria-label="Open stats for {{game.captain.name}}"
+            >
+              <span class="captain-name">{{game.captain.name}}</span>
+            </button>
+          </div>
+
+          <div class="minimap-stack">
+            <div class="minimap" aria-label="Mini map">
+              <div class="minimap-inner">
+                <!-- Fixed octagon land outline (matches sand cull); not draggable -->
+                <div class="minimap-land" aria-hidden="true">
+                  <div class="minimap-sites" aria-hidden="true"></div>
+                </div>
+                <!-- Full-circle H+V crosshair; segments stop at view box -->
+                <div class="minimap-crosshair" aria-hidden="true">
+                  <div class="minimap-crosshair__v minimap-crosshair__v--top"></div>
+                  <div class="minimap-crosshair__v minimap-crosshair__v--bot"></div>
+                  <div class="minimap-crosshair__h minimap-crosshair__h--left"></div>
+                  <div class="minimap-crosshair__h minimap-crosshair__h--right"></div>
+                </div>
+                <div class="minimap-viewport" aria-hidden="true"></div>
+              </div>
+            </div>
+            <div class="minimap-tools">
+              <button
+                type="button"
+                class="minimap-tool minimap-tool--home"
+                aria-label="Home"
+                title="Home"
+              >
+                <span class="side-ico" aria-hidden="true">
+                  <svg class="ico-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      fill="#E8F4FF"
+                      stroke="#161B22"
+                      stroke-width="4"
+                      stroke-linejoin="round"
+                      d="M8 30 L32 10 L56 30 V54 H40 V38 H24 V54 H8 Z"
+                    />
+                  </svg>
+                </span>
+              </button>
+              <button
+                type="button"
+                class="minimap-tool minimap-tool--zoom"
+                aria-label="Search"
+                title="Search"
+                ng-click="game.openSearch(); $event.stopPropagation()"
+              >
+                <span class="side-ico" aria-hidden="true">
+                  <svg class="ico-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <circle
+                      cx="28"
+                      cy="28"
+                      r="16"
+                      fill="none"
+                      stroke="#E8F4FF"
+                      stroke-width="6"
+                    />
+                    <circle
+                      cx="28"
+                      cy="28"
+                      r="16"
+                      fill="none"
+                      stroke="#161B22"
+                      stroke-width="3"
+                    />
+                    <line
+                      x1="40"
+                      y1="40"
+                      x2="54"
+                      y2="54"
+                      stroke="#161B22"
+                      stroke-width="7"
+                      stroke-linecap="round"
+                    />
+                    <line
+                      x1="40"
+                      y1="40"
+                      x2="54"
+                      y2="54"
+                      stroke="#E8F4FF"
+                      stroke-width="3.5"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side columns — chunky squircle chrome + inline SVG icons -->
+        <aside class="side-col side-col--left">
+          <button
+            type="button"
+            class="side-btn"
+            aria-label="Mail"
+            ng-click="game.openMail()"
+          >
+            <span class="side-ico" aria-hidden="true">
+              <svg class="ico-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <rect x="6" y="16" width="52" height="36" rx="7" fill="#E6F0FF" stroke="#161B22" stroke-width="4"/>
+                <path d="M10 48 L32 32 L54 48" fill="#C5D9F1" stroke="#161B22" stroke-width="3.5" stroke-linejoin="round"/>
+                <path d="M10 20 L32 36 L54 20" fill="none" stroke="#161B22" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+                <circle cx="32" cy="34" r="5.5" fill="#FF7E79" stroke="#161B22" stroke-width="2.5"/>
+                <circle cx="30.5" cy="32.5" r="1.4" fill="#fff"/>
+              </svg>
+            </span>
+            <span
+              class="badge badge--bang"
+              ng-if="game.hasUnreadMail()"
+              aria-hidden="true"
+              >!</span
+            >
+          </button>
+
+          <button
+            type="button"
+            class="side-btn"
+            aria-label="Alerts"
+            ng-click="game.openAlerts()"
+          >
+            <span class="side-ico" aria-hidden="true">
+              <svg class="ico-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="bellGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#FFE566"/>
+                    <stop offset="55%" stop-color="#FFD845"/>
+                    <stop offset="100%" stop-color="#F0A820"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="32" cy="12" r="4" fill="none" stroke="#162534" stroke-width="3.5"/>
+                <path d="M18 26 C18 18 22 14 32 14 C42 14 46 18 46 26 L48 42 C48 46 44 48 32 48 C20 48 16 46 16 42 Z"
+                      fill="url(#bellGrad)" stroke="#162534" stroke-width="3.5" stroke-linejoin="round"/>
+                <path d="M22 42 H42" stroke="#E09820" stroke-width="2" opacity="0.5"/>
+                <ellipse cx="32" cy="52" rx="8" ry="4" fill="#FFD845" stroke="#162534" stroke-width="3"/>
+              </svg>
+            </span>
+            <span
+              class="badge badge--bang"
+              ng-if="game.hasUnreadAlerts()"
+              aria-hidden="true"
+              >!</span
+            >
+          </button>
+
+          <button
+            type="button"
+            class="side-btn"
+            aria-label="Settings"
+            ng-click="game.openSettings()"
+          >
+            <span class="side-ico" aria-hidden="true">
+              <svg class="ico-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <path d="M32 6 L38 10 L44 8 L46 14 L52 16 L50 22 L54 28 L50 34 L52 40 L46 42 L44 48 L38 46 L32 50 L26 46 L20 48 L18 42 L12 40 L14 34 L10 28 L14 22 L12 16 L18 14 L20 8 L26 10 Z"
+                      fill="#9EB7CF" stroke="#162534" stroke-width="3.5" stroke-linejoin="round"/>
+                <circle cx="32" cy="28" r="10" fill="#7A96B0" stroke="#162534" stroke-width="3"/>
+                <circle cx="32" cy="28" r="5" fill="#0A1520"/>
+                <path d="M24 22 Q28 18 34 20" fill="none" stroke="#D8E8F4" stroke-width="2.2" stroke-linecap="round" opacity="0.85"/>
+              </svg>
+            </span>
+          </button>
+        </aside>
+
+        <aside class="side-col side-col--right">
+          <button
+            type="button"
+            class="side-btn"
+            aria-label="Rewards"
+            ng-click="game.openRewards()"
+          >
+            <span class="side-ico" aria-hidden="true">
+              <svg class="ico-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <path d="M32 10 L22 4 L20 12 Z" fill="#FFD845" stroke="#162534" stroke-width="2.8" stroke-linejoin="round"/>
+                <path d="M32 10 L42 4 L44 12 Z" fill="#FFD845" stroke="#162534" stroke-width="2.8" stroke-linejoin="round"/>
+                <rect x="28" y="8" width="8" height="7" rx="1.5" fill="#FFD845" stroke="#162534" stroke-width="2.5"/>
+                <path d="M10 18 H54 V28 H10 Z" fill="#E85A4F" stroke="#162534" stroke-width="3.2" stroke-linejoin="round"/>
+                <path d="M32 18 H54 V28 H32 Z" fill="#C4453C"/>
+                <rect x="28" y="18" width="8" height="10" fill="#FFD845"/>
+                <path d="M14 28 H50 V52 H14 Z" fill="#E85A4F" stroke="#162534" stroke-width="3.2" stroke-linejoin="round"/>
+                <path d="M32 28 H50 V52 H32 Z" fill="#C4453C"/>
+                <rect x="28" y="28" width="8" height="24" fill="#FFD845" stroke="#162534" stroke-width="2"/>
+              </svg>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="side-btn"
+            aria-label="Daily Lucky Spin"
+            ng-click="game.openSpin()"
+          >
+            <span class="side-ico" aria-hidden="true">
+              <svg class="ico-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <path d="M32 2 L38 12 L26 12 Z" fill="#E74C3C" stroke="#162534" stroke-width="2.8" stroke-linejoin="round"/>
+                <circle cx="32" cy="36" r="24" fill="#FFD845" stroke="#162534" stroke-width="3.5"/>
+                <circle cx="32" cy="36" r="18" fill="#2ECC71" stroke="#162534" stroke-width="2.5"/>
+                <path d="M32 36 L32 18 A18 18 0 0 1 44.7 23.3 Z" fill="#E74C3C"/>
+                <path d="M32 36 L44.7 23.3 A18 18 0 0 1 50 36 Z" fill="#5DADE2"/>
+                <path d="M32 36 L50 36 A18 18 0 0 1 44.7 48.7 Z" fill="#2ECC71"/>
+                <path d="M32 36 L44.7 48.7 A18 18 0 0 1 32 54 Z" fill="#F1C40F"/>
+                <path d="M32 36 L32 54 A18 18 0 0 1 19.3 48.7 Z" fill="#9B59B6"/>
+                <path d="M32 36 L19.3 48.7 A18 18 0 0 1 14 36 Z" fill="#E67E22"/>
+                <path d="M32 36 L14 36 A18 18 0 0 1 19.3 23.3 Z" fill="#5DADE2"/>
+                <path d="M32 36 L19.3 23.3 A18 18 0 0 1 32 18 Z" fill="#2ECC71"/>
+                <circle cx="32" cy="36" r="18" fill="none" stroke="#162534" stroke-width="2.5"/>
+                <circle cx="32" cy="14" r="1.6" fill="#fff"/>
+                <circle cx="48" cy="20" r="1.6" fill="#fff"/>
+                <circle cx="54" cy="36" r="1.6" fill="#fff"/>
+                <circle cx="48" cy="52" r="1.6" fill="#fff"/>
+                <circle cx="32" cy="58" r="1.6" fill="#fff"/>
+                <circle cx="16" cy="52" r="1.6" fill="#fff"/>
+                <circle cx="10" cy="36" r="1.6" fill="#fff"/>
+                <circle cx="16" cy="20" r="1.6" fill="#fff"/>
+                <circle cx="32" cy="36" r="5" fill="#FFF3C4" stroke="#162534" stroke-width="2.5"/>
+                <circle cx="32" cy="36" r="5" fill="none" stroke="#FFD845" stroke-width="1.5"/>
+              </svg>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="side-btn"
+            aria-label="Ranking"
+            ng-click="game.openRanking()"
+          >
+            <span class="side-ico" aria-hidden="true">
+              <svg class="ico-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 18 C8 18 6 28 12 32" fill="none" stroke="#162534" stroke-width="5" stroke-linecap="round"/>
+                <path d="M16 18 C8 18 6 28 12 32" fill="none" stroke="#FFD845" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M48 18 C56 18 58 28 52 32" fill="none" stroke="#162534" stroke-width="5" stroke-linecap="round"/>
+                <path d="M48 18 C56 18 58 28 52 32" fill="none" stroke="#E8B84A" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M18 14 H46 L42 36 Q32 42 22 36 Z" fill="#FFD845" stroke="#162534" stroke-width="3.2" stroke-linejoin="round"/>
+                <path d="M32 14 H46 L42 36 Q37 40 32 40 Z" fill="#E8B84A"/>
+                <path d="M20 16 L22 34" stroke="#FFF3C4" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+                <path d="M32 22 L33.6 26.8 L38.8 26.8 L34.6 29.8 L36.2 34.6 L32 31.6 L27.8 34.6 L29.4 29.8 L25.2 26.8 L30.4 26.8 Z"
+                      fill="#FFF3C4" stroke="#162534" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M28 40 H36 L38 46 H26 Z" fill="#FFD845" stroke="#162534" stroke-width="2.5" stroke-linejoin="round"/>
+                <path d="M32 40 H36 L38 46 H32 Z" fill="#E8B84A"/>
+                <rect x="22" y="46" width="20" height="5" rx="1" fill="#FFD845" stroke="#162534" stroke-width="2.5"/>
+                <rect x="16" y="51" width="32" height="8" rx="2" fill="#FFD845" stroke="#162534" stroke-width="2.5"/>
+                <rect x="16" y="51" width="6" height="8" rx="2" fill="#8B5A2B"/>
+                <rect x="42" y="51" width="6" height="8" rx="2" fill="#8B5A2B"/>
+              </svg>
+            </span>
+          </button>
+        </aside>
+
+        <!-- Continuous sand hex field (~100×100), pan/drag -->
+        <main
+          class="land-stage"
+          aria-label="Coral land hex map"
+          hex-field
+          cols="game.hexMap.cols"
+          rows="game.hexMap.rows"
+          hex-w="game.hexMap.hexW"
+          hex-h="game.hexMap.hexH"
+        >
+          <div class="hex-grid">
+            <div class="hex-sand-plate" aria-hidden="true"></div>
+            <div class="hex-layer" aria-hidden="true"></div>
+            <div class="hex-select-layer" aria-hidden="true"></div>
+            <button
+              type="button"
+              class="hex-build-btn"
+              hidden
+              aria-label="Build"
+            >
+              <span class="hex-build-ico" aria-hidden="true"></span>
+            </button>
+            <div class="hex-actions" hidden aria-label="Structure actions"></div>
+            <svg
+              class="hex-travel-svg"
+              hidden
+              aria-hidden="true"
+              overflow="visible"
+            >
+              <g class="hex-travel-routes"></g>
+              <path class="hex-travel-path hex-travel-path--preview" fill="none" />
+              <text
+                class="hex-travel-label hex-travel-label--preview"
+                text-anchor="middle"
+                dominant-baseline="middle"
+              ></text>
+            </svg>
+            <div class="hex-travel-squads"></div>
+            <div
+              class="hex-travel-actions"
+              hidden
+              aria-label="Travel squad actions"
+            ></div>
+
+            <!-- Landmarks near map center (pan with the grid) -->
+            <div class="landmark landmark--castle">
+              <div class="castle">
+                <div class="castle-base"></div>
+                <div class="castle-mid"></div>
+                <div class="castle-top"></div>
+                <div class="castle-window w1"></div>
+                <div class="castle-window w2"></div>
+                <div class="castle-window w3"></div>
+              </div>
+            </div>
+
+            <div class="landmark landmark--clam">
+              <div class="clam">
+                <div class="clam-shell clam-shell--top"></div>
+                <div class="pearl"></div>
+                <div class="clam-shell clam-shell--bot"></div>
+              </div>
+            </div>
+
+            <div class="landmark landmark--clam landmark--clam-b">
+              <div class="clam">
+                <div class="clam-shell clam-shell--top"></div>
+                <div class="pearl"></div>
+                <div class="clam-shell clam-shell--bot"></div>
+              </div>
+            </div>
+
+            <div class="landmark landmark--arch">
+              <div class="arch">
+                <div class="arch-pillar arch-pillar--l"></div>
+                <div class="arch-pillar arch-pillar--r"></div>
+                <div class="arch-top"></div>
+              </div>
+              <div class="sandy-path"></div>
+            </div>
+
+            <div class="landmark landmark--crab">
+              <div class="crab">
+                <div class="chest"></div>
+                <div class="crab-body"></div>
+                <div class="claw claw--l"></div>
+                <div class="claw claw--r"></div>
+              </div>
+            </div>
+
+            <div class="landmark landmark--crab landmark--crab-b">
+              <div class="crab">
+                <div class="chest"></div>
+                <div class="crab-body"></div>
+                <div class="claw claw--l"></div>
+                <div class="claw claw--r"></div>
+              </div>
+            </div>
+
+            <div class="landmark landmark--manta m1">
+              <div class="manta"></div>
+            </div>
+            <div class="landmark landmark--manta m2">
+              <div class="manta"></div>
+            </div>
+            <div class="landmark landmark--manta m3">
+              <div class="manta"></div>
+            </div>
+
+            <div class="dotted-path dotted-path--a"></div>
+            <div class="dotted-path dotted-path--b"></div>
+          </div>
+        </main>
+
+        <!-- Atmosphere in front of land, behind HUD -->
+        <div class="atmosphere" aria-hidden="true">
+          <div class="bubbles">
+            <span ng-repeat="n in [1,2,3,4,5,6,7,8,9,10,11,12] track by n" class="bubble bubble-{{n}}"></span>
+          </div>
+          <div class="seaweed seaweed-left">
+            <span class="frond f1"></span>
+            <span class="frond f2"></span>
+            <span class="frond f3"></span>
+          </div>
+          <div class="seaweed seaweed-right">
+            <span class="frond f1"></span>
+            <span class="frond f2"></span>
+            <span class="frond f3"></span>
+          </div>
+        </div>
+
+        <!-- Bottom chat + nav -->
+        <footer class="bottom-ui">
+          <div class="chat-strip">
+            <div class="chat-tabs">
+              <button
+                type="button"
+                class="chat-tab"
+                ng-class="{'is-active': game.chatTab === 'global'}"
+                ng-click="game.setChatTab('global')"
+              >
+                Global chat
+              </button>
+              <button
+                type="button"
+                class="chat-tab"
+                ng-class="{'is-active': game.chatTab === 'alliance'}"
+                ng-click="game.setChatTab('alliance')"
+              >
+                Alliance chat
+              </button>
+            </div>
+            <div class="chat-row">
+              <p class="chat-msg" ng-click="game.openChat()">{{game.chatMessage}}</p>
+              <button
+                type="button"
+                class="chat-open-btn"
+                aria-label="Open chat"
+                ng-click="game.openChat()"
+              >
+                <span class="chat-open-ico" aria-hidden="true"></span>
+              </button>
+            </div>
+          </div>
+
+          <nav class="main-nav">
+            <button
+              type="button"
+              class="nav-btn"
+              ng-class="{'is-active': game.nav === 'squad'}"
+              ng-click="game.setNav('squad')"
+            >
+              <span class="nav-ico nav-ico--squad"></span>
+              <span>Squad</span>
+            </button>
+            <button
+              type="button"
+              class="nav-btn"
+              ng-class="{'is-active': game.nav === 'radar'}"
+              ng-click="game.setNav('radar')"
+            >
+              <span class="nav-ico nav-ico--radar" aria-hidden="true"></span>
+              <span>Radar</span>
+            </button>
+            <button
+              type="button"
+              class="nav-btn"
+              ng-class="{'is-active': game.nav === 'alliance'}"
+              ng-click="game.setNav('alliance')"
+            >
+              <span class="nav-ico nav-ico--alliance"></span>
+              <span>Alliance</span>
+            </button>
+          </nav>
+        </footer>
+
+        <!-- Travel confirm: attack (enemy) or move (ally / own / empty) -->
+        <div
+          class="msg-overlay msg-overlay--travel-confirm"
+          ng-if="game.travelConfirmOpen && game.travelConfirm"
+          ng-click="game.dismissTravelConfirm()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel move-confirm-panel"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Confirm travel"
+          >
+            <div class="msg-panel__inner">
+              <header class="msg-header">
+                <h2 class="msg-title">
+                  {{game.travelConfirm.kind === 'attack'
+                    ? 'Attack'
+                    : game.travelConfirm.kind === 'teleport'
+                      ? 'Teleport'
+                      : 'Move'}}
+                </h2>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Cancel"
+                  ng-click="game.dismissTravelConfirm()"
+                >
+                  ×
+                </button>
+              </header>
+              <div class="move-body">
+                <p class="move-hint" ng-if="game.travelConfirm.kind === 'attack'">
+                  Attack <strong>{{game.travelConfirm.label}}</strong>?
+                  This marks them as an enemy.
+                  Travel time: <strong>{{game.travelConfirm.ticks}}</strong> ticks.
+                </p>
+                <p class="move-hint" ng-if="game.travelConfirm.kind === 'move'">
+                  Move to <strong>{{game.travelConfirm.label}}</strong>?
+                  Travel time: <strong>{{game.travelConfirm.ticks}}</strong> ticks.
+                </p>
+                <p class="move-hint" ng-if="game.travelConfirm.kind === 'teleport'">
+                  Teleport to <strong>{{game.travelConfirm.label}}</strong>?
+                  Costs <strong>{{game.travelConfirm.cost || 300}}</strong> chemicals ·
+                  <strong>{{game.travelConfirm.ticks}}</strong> tick.
+                </p>
+                <p
+                  class="squad-status"
+                  ng-if="game.travelConfirm.failReason"
+                >{{game.travelConfirm.failReason}}</p>
+                <div class="move-confirm-actions">
+                  <button
+                    type="button"
+                    class="move-travel-btn move-travel-btn--ghost"
+                    ng-click="game.dismissTravelConfirm()"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    class="move-travel-btn"
+                    ng-class="{
+                      'move-travel-btn--attack': game.travelConfirm.kind === 'attack',
+                      'move-travel-btn--teleport': game.travelConfirm.kind === 'teleport'
+                    }"
+                    ng-click="game.confirmTravel()"
+                    ng-disabled="game.travelConfirm.kind === 'teleport' && game.getResource('flask') < (game.travelConfirm.cost || 300)"
+                  >
+                    {{game.travelConfirm.kind === 'attack'
+                      ? 'Confirm Attack'
+                      : game.travelConfirm.kind === 'teleport'
+                        ? 'Confirm Teleport'
+                        : 'Confirm Move'}}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Move panel: squads on selected structure cell -->
+        <div
+          class="msg-overlay"
+          ng-if="game.moveOpen"
+          ng-click="game.closeMove()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel move-panel"
+            ng-controller="MoveCtrl as move"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Move squads"
+          >
+            <div class="msg-panel__inner">
+              <header class="msg-header">
+                <h2 class="msg-title">Move</h2>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Close move"
+                  ng-click="game.closeMove()"
+                >
+                  ×
+                </button>
+              </header>
+              <div class="move-body">
+                <p class="move-hint">
+                  Squads idle on <strong>{{move.siteLabel()}}</strong>
+                </p>
+                <ul class="move-list" ng-if="move.squads().length">
+                  <li
+                    class="move-row"
+                    ng-repeat="s in move.squads() track by s.id"
+                  >
+                    <label
+                      class="move-check"
+                      ng-class="{'is-on': move.isSelected(s)}"
+                      ng-click="move.toggle(s); $event.preventDefault()"
+                    >
+                      <span class="move-check__box" aria-hidden="true"></span>
+                      <span class="move-check__meta">
+                        <span class="move-check__name">
+                          {{s.name}}
+                          <span class="squad-size">{{move.fishSize(s)}}</span>
+                        </span>
+                        <span class="move-check__loc">{{s.location}}</span>
+                      </span>
+                    </label>
+                  </li>
+                </ul>
+                <p class="move-empty" ng-if="!move.squads().length">
+                  No idle squads on this cell.
+                </p>
+                <button
+                  type="button"
+                  class="move-travel-btn"
+                  ng-click="move.travel()"
+                  ng-disabled="!move.canTravel()"
+                >
+                  Travel
+                </button>
+                <p class="squad-status" ng-if="move.status">{{move.status}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teleport panel (sand tunnel warp) -->
+        <div
+          class="msg-overlay"
+          ng-if="game.teleportOpen"
+          ng-click="game.closeTeleport()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel teleport-panel"
+            ng-controller="TeleportCtrl as teleport"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Teleport squads"
+          >
+            <div class="msg-panel__inner">
+              <header class="msg-header">
+                <h2 class="msg-title">Teleport</h2>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Close teleport"
+                  ng-click="game.closeTeleport()"
+                >
+                  ×
+                </button>
+              </header>
+              <div class="move-body">
+                <p class="move-hint">
+                  Squads idle on <strong>{{teleport.siteLabel()}}</strong>.
+                  Teleport costs <strong>{{teleport.cost()}}</strong> chemicals ·
+                  <strong>{{teleport.ticks()}}</strong> tick
+                  (you have {{teleport.chemicals()}}).
+                </p>
+                <ul class="move-list" ng-if="teleport.squads().length">
+                  <li
+                    class="move-row"
+                    ng-repeat="s in teleport.squads() track by s.id"
+                  >
+                    <label
+                      class="move-check"
+                      ng-class="{'is-on': teleport.isSelected(s)}"
+                      ng-click="teleport.toggle(s); $event.preventDefault()"
+                    >
+                      <span class="move-check__box" aria-hidden="true"></span>
+                      <span class="move-check__meta">
+                        <span class="move-check__name">
+                          {{s.name}}
+                          <span class="squad-size">{{teleport.fishSize(s)}}</span>
+                        </span>
+                        <span class="move-check__loc">{{s.location}}</span>
+                      </span>
+                    </label>
+                  </li>
+                </ul>
+                <p class="move-empty" ng-if="!teleport.squads().length">
+                  No idle squads on this tunnel.
+                </p>
+                <button
+                  type="button"
+                  class="move-travel-btn move-travel-btn--teleport"
+                  ng-click="teleport.teleport()"
+                  ng-disabled="!teleport.canTeleport()"
+                >
+                  Teleport
+                </button>
+                <p class="squad-status" ng-if="teleport.status">{{teleport.status}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Build panel -->
+        <div
+          class="msg-overlay"
+          ng-if="game.buildOpen"
+          ng-click="game.closeBuild()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel build-panel"
+            ng-controller="BuildCtrl as build"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Build"
+          >
+            <div class="msg-panel__inner">
+              <header class="msg-header">
+                <h2 class="msg-title">Build</h2>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Close build"
+                  ng-click="game.closeBuild()"
+                >
+                  ×
+                </button>
+              </header>
+              <div class="build-body">
+                <p class="build-hint">
+                  Choose a structure — costs
+                  <strong>{{build.cost}}</strong> scraps
+                  (you have {{build.scrap()}}).
+                </p>
+                <ul class="build-options">
+                  <li ng-repeat="opt in build.options track by opt.id">
+                    <button
+                      type="button"
+                      class="build-option"
+                      ng-class="{'is-disabled': build.isDisabled(opt)}"
+                      ng-disabled="build.isDisabled(opt)"
+                      ng-click="build.pick(opt)"
+                    >
+                      <span
+                        class="build-option__art"
+                        ng-class="'build-option__art--' + opt.id"
+                        aria-hidden="true"
+                      ></span>
+                      <span class="build-option__meta">
+                        <span class="build-option__name">{{opt.name}}</span>
+                        <span class="build-option__desc">{{opt.desc}}</span>
+                        <span class="build-option__cost">{{build.cost}} scraps</span>
+                        <span
+                          class="build-option__lock"
+                          ng-if="build.isDisabled(opt)"
+                        >{{build.disableReason(opt)}}</span>
+                      </span>
+                    </button>
+                  </li>
+                </ul>
+                <p class="squad-status" ng-if="build.status">{{build.status}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat panel -->
+        <div
+          class="msg-overlay"
+          ng-if="game.chatOpen"
+          ng-click="game.closeChat()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel chat-panel"
+            ng-controller="ChatCtrl as chat"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Chat"
+          >
+            <div class="msg-panel__inner">
+              <header class="msg-header">
+                <h2 class="msg-title">Chat</h2>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Close chat"
+                  ng-click="game.closeChat()"
+                >
+                  ×
+                </button>
+              </header>
+              <div class="chat-panel-tabs">
+                <button
+                  type="button"
+                  class="chat-panel-tab"
+                  ng-class="{'is-active': chat.tab === 'global'}"
+                  ng-click="chat.setTab('global')"
+                >
+                  Global
+                </button>
+                <button
+                  type="button"
+                  class="chat-panel-tab"
+                  ng-class="{'is-active': chat.tab === 'alliance'}"
+                  ng-click="chat.setTab('alliance')"
+                >
+                  Alliance
+                </button>
+              </div>
+              <ul class="chat-feed">
+                <li
+                  class="chat-line"
+                  ng-repeat="m in chat.messages() track by m.id"
+                >
+                  <span class="chat-line__user">{{chat.displayName(m)}}</span>
+                  <span class="chat-line__text">{{m.text}}</span>
+                </li>
+              </ul>
+              <div class="chat-compose">
+                <input
+                  class="chat-compose__input"
+                  type="text"
+                  maxlength="120"
+                  placeholder="Type a message…"
+                  ng-model="chat.draft"
+                  ng-keyup="$event.keyCode === 13 && chat.send()"
+                  aria-label="Chat message"
+                />
+                <button
+                  type="button"
+                  class="chat-compose__send"
+                  ng-click="chat.send()"
+                >
+                  Send
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Squad panel -->
+        <div
+          class="msg-overlay"
+          ng-if="game.squadOpen"
+          ng-click="game.closeSquad()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel squad-panel"
+            ng-controller="SquadCtrl as squad"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Squad"
+          >
+            <div class="msg-panel__inner">
+              <!-- List -->
+              <div class="msg-panel__view" ng-if="squad.view === 'list'">
+                <header class="msg-header">
+                  <h2 class="msg-title">Squad</h2>
+                  <button
+                    type="button"
+                    class="msg-close"
+                    aria-label="Close squad"
+                    ng-click="game.closeSquad()"
+                  >
+                    ×
+                  </button>
+                </header>
+                <div class="squad-body">
+                  <button
+                    type="button"
+                    class="squad-create-btn"
+                    ng-click="squad.openCreate()"
+                  >
+                    Create
+                  </button>
+                  <ul class="squad-list" ng-if="squad.squads.length">
+                    <li
+                      class="squad-row"
+                      ng-repeat="s in squad.squads track by s.id"
+                    >
+                      <div class="squad-info">
+                        <span class="squad-name">
+                          {{s.name}}
+                          <span class="squad-size">{{squad.fishSize(s)}}</span>
+                        </span>
+                        <span
+                          class="squad-state"
+                          ng-class="'squad-state--' + s.state"
+                        >{{squad.stateLabel(s)}}</span>
+                      </div>
+                      <button
+                        type="button"
+                        class="squad-action squad-action--go"
+                        ng-click="squad.goSquad(s)"
+                        ng-disabled="!squad.canGo(s)"
+                      >
+                        Go
+                      </button>
+                    </li>
+                  </ul>
+                  <p class="squad-empty" ng-if="!squad.squads.length">
+                    No squads yet — tap Create.
+                  </p>
+                  <p class="squad-status" ng-if="squad.status">{{squad.status}}</p>
+                </div>
+              </div>
+
+              <!-- Create -->
+              <div class="msg-panel__view" ng-if="squad.view === 'create'">
+                <header class="msg-header">
+                  <button
+                    type="button"
+                    class="msg-back"
+                    aria-label="Back to squads"
+                    ng-click="squad.backToList()"
+                  >
+                    ‹ Back
+                  </button>
+                  <button
+                    type="button"
+                    class="msg-close"
+                    aria-label="Close squad"
+                    ng-click="game.closeSquad()"
+                  >
+                    ×
+                  </button>
+                </header>
+                <div class="squad-body squad-body--create">
+                  <h3 class="settings-label">Create squad</h3>
+                  <div class="settings-row">
+                    <input
+                      class="settings-input"
+                      type="text"
+                      maxlength="24"
+                      placeholder="Squad name"
+                      ng-model="squad.newName"
+                      ng-keyup="$event.keyCode === 13 && squad.createSquad()"
+                      aria-label="Squad name"
+                    />
+                    <button
+                      type="button"
+                      class="settings-btn settings-btn--update"
+                      ng-click="squad.createSquad()"
+                      ng-disabled="!squad.canCreate()"
+                    >
+                      Create
+                    </button>
+                  </div>
+
+                  <div class="squad-compose">
+                    <div class="squad-compose__legend">
+                      <span>Scout · Hitter · Tank</span>
+                      <span>Armoured · Shock · Toxic</span>
+                    </div>
+                    <div class="squad-unit-table" role="grid" aria-label="Squad units">
+                      <div class="squad-unit-table__corner" aria-hidden="true"></div>
+                      <div
+                        class="squad-unit-table__colhead"
+                        ng-repeat="el in squad.elements track by el.id"
+                      >{{el.name}}</div>
+
+                      <div
+                        class="squad-unit-table__row"
+                        ng-repeat="fish in squad.fishes track by fish.id"
+                      >
+                        <div class="squad-unit-table__rowhead">
+                          <img
+                            class="squad-unit-table__ico"
+                            ng-src="{{fish.icon}}"
+                            alt=""
+                            width="40"
+                            height="40"
+                            draggable="false"
+                          />
+                          <div class="squad-unit-table__labels">
+                            <span class="squad-unit-table__fish">{{fish.name}}</span>
+                            <span class="squad-unit-table__role">{{fish.role}}</span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          class="squad-unit"
+                          ng-repeat="el in squad.elements track by el.id"
+                          ng-class="{'has-units': squad.getCount(fish.id, el.id) > 0}"
+                          ng-click="squad.addUnit(fish.id, el.id)"
+                          aria-label="Add {{el.name}} {{fish.name}}"
+                        >
+                          <span class="squad-unit__count">{{squad.getCount(fish.id, el.id)}}</span>
+                          <span
+                            class="squad-unit__minus"
+                            ng-if="squad.getCount(fish.id, el.id) > 0"
+                            ng-click="squad.removeUnit(fish.id, el.id, $event)"
+                            aria-label="Remove one"
+                          >−</span>
+                        </button>
+                      </div>
+                    </div>
+                    <p class="squad-unit-total">
+                      Total
+                      <strong>{{squad.totalUnits()}}</strong>
+                      / {{squad.MAX_UNITS}}
+                      ·
+                      <strong>{{squad.buildCost().ticks}}</strong>
+                      ticks
+                    </p>
+                    <ul class="squad-build-cost" ng-if="squad.totalUnits() > 0">
+                      <li
+                        class="squad-build-cost__line"
+                        ng-class="{'is-short': squad.isCostShort('fish')}"
+                        ng-if="squad.buildCost().fish"
+                      >
+                        {{squad.buildCost().fish}} population
+                        <span class="squad-build-cost__have"
+                          >({{game.getResource('fish')}})</span
+                        >
+                      </li>
+                      <li
+                        class="squad-build-cost__line"
+                        ng-class="{'is-short': squad.isCostShort('scrap')}"
+                        ng-if="squad.buildCost().scrap"
+                      >
+                        {{squad.buildCost().scrap}} scraps
+                        <span class="squad-build-cost__have"
+                          >({{game.getResource('scrap')}})</span
+                        >
+                      </li>
+                      <li
+                        class="squad-build-cost__line"
+                        ng-class="{'is-short': squad.isCostShort('flask')}"
+                        ng-if="squad.buildCost().flask"
+                      >
+                        {{squad.buildCost().flask}} chemicals
+                        <span class="squad-build-cost__have"
+                          >({{game.getResource('flask')}})</span
+                        >
+                      </li>
+                      <li
+                        class="squad-build-cost__line"
+                        ng-class="{'is-short': squad.isCostShort('energy')}"
+                        ng-if="squad.buildCost().energy"
+                      >
+                        {{squad.buildCost().energy}} energy
+                        <span class="squad-build-cost__have"
+                          >({{game.getResource('energy')}})</span
+                        >
+                      </li>
+                    </ul>
+                    <p class="squad-build-hint">
+                      Each unit: 2 population · Armoured +50 scraps · Shock +50
+                      energy · Toxic +50 chemicals · Build time = unit count
+                    </p>
+                  </div>
+
+                  <p class="squad-status" ng-if="squad.status">{{squad.status}}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Radar panel -->
+        <div
+          class="msg-overlay"
+          ng-if="game.radarOpen"
+          ng-click="game.closeRadar()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel radar-panel"
+            ng-controller="RadarCtrl as radar"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Radar"
+          >
+            <div class="msg-panel__inner">
+              <header class="msg-header">
+                <h2 class="msg-title">Radar</h2>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Close radar"
+                  ng-click="game.closeRadar()"
+                >
+                  ×
+                </button>
+              </header>
+              <div class="squad-body">
+                <ul class="squad-list" ng-if="radar.contacts.length">
+                  <li
+                    class="squad-row"
+                    ng-class="{'radar-row--ally': c.side === 'ally', 'radar-row--enemy': c.side === 'enemy'}"
+                    ng-repeat="c in radar.contacts track by c.id"
+                  >
+                    <div class="squad-info">
+                      <span class="squad-name">{{c.name}}</span>
+                      <span
+                        class="squad-state"
+                        ng-class="c.side === 'enemy' ? 'squad-state--enemy' : 'squad-state--ally'"
+                      >{{radar.sideLabel(c)}}</span>
+                    </div>
+                    <button
+                      type="button"
+                      class="squad-action squad-action--go"
+                      ng-click="radar.goContact(c)"
+                    >
+                      Go
+                    </button>
+                  </li>
+                </ul>
+                <p class="squad-empty" ng-if="!radar.contacts.length">
+                  No moving squads on radar.
+                </p>
+                <p class="squad-status" ng-if="radar.status">{{radar.status}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alliance panel -->
+        <div
+          class="msg-overlay"
+          ng-if="game.allianceOpen"
+          ng-click="game.closeAlliance()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel alliance-panel"
+            ng-controller="AllianceCtrl as alliance"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Alliance"
+          >
+            <div class="msg-panel__inner">
+              <!-- Members (in alliance) -->
+              <div
+                class="msg-panel__view"
+                ng-if="alliance.hasAlliance() && alliance.view === 'main'"
+              >
+                <header class="msg-header">
+                  <h2 class="msg-title">
+                    <span class="alliance-tag" ng-if="alliance.allianceTag"
+                      >[{{alliance.allianceTag}}]</span
+                    >
+                    {{alliance.allianceName}}
+                  </h2>
+                  <button
+                    type="button"
+                    class="msg-close"
+                    aria-label="Close alliance"
+                    ng-click="game.closeAlliance()"
+                  >
+                    ×
+                  </button>
+                </header>
+                <div class="squad-body">
+                  <p class="alliance-meta" ng-if="alliance.isLeader">You are the leader</p>
+                  <button
+                    type="button"
+                    class="alliance-announce-btn"
+                    ng-if="alliance.isLeader"
+                    ng-click="alliance.openAnnounce()"
+                  >
+                    Create announcement
+                  </button>
+                  <ul class="squad-list" ng-if="alliance.members.length">
+                    <li
+                      class="squad-row"
+                      ng-repeat="m in alliance.members track by m.id"
+                    >
+                      <div class="squad-info">
+                        <span class="squad-name">{{m.name}}</span>
+                        <span class="squad-state squad-state--role">{{alliance.roleLabel(m)}}</span>
+                      </div>
+                      <div class="alliance-row-actions">
+                        <button
+                          type="button"
+                          class="squad-action squad-action--go"
+                          ng-if="alliance.canGo(m)"
+                          ng-click="alliance.goPerson(m)"
+                        >
+                          Go
+                        </button>
+                        <button
+                          type="button"
+                          class="squad-action squad-action--del"
+                          ng-if="alliance.canKick(m)"
+                          ng-click="alliance.kickMember(m)"
+                          aria-label="Kick {{m.name}}"
+                        >
+                          Kick
+                        </button>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <div ng-if="alliance.isLeader">
+                    <h3 class="alliance-section-title">Join requests</h3>
+                    <ul class="squad-list" ng-if="alliance.joinRequests.length">
+                      <li
+                        class="squad-row"
+                        ng-repeat="req in alliance.joinRequests track by req.id"
+                      >
+                        <div class="squad-info">
+                          <span class="squad-name">{{req.name}}</span>
+                          <span class="squad-state">wants to join</span>
+                        </div>
+                        <div class="alliance-join-actions">
+                          <button
+                            type="button"
+                            class="squad-action squad-action--go"
+                            ng-if="alliance.canGo(req)"
+                            ng-click="alliance.goPerson(req)"
+                          >
+                            Go
+                          </button>
+                          <button
+                            type="button"
+                            class="alliance-join-btn alliance-join-btn--ok"
+                            ng-click="alliance.approveJoin(req)"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            type="button"
+                            class="alliance-join-btn alliance-join-btn--no"
+                            ng-click="alliance.denyJoin(req)"
+                          >
+                            Deny
+                          </button>
+                        </div>
+                      </li>
+                    </ul>
+                    <p class="squad-empty" ng-if="!alliance.joinRequests.length">
+                      No pending join requests.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="alliance-leave-btn"
+                    ng-click="alliance.leaveAlliance()"
+                  >
+                    Leave alliance
+                  </button>
+                  <p class="squad-status" ng-if="alliance.status">{{alliance.status}}</p>
+                </div>
+              </div>
+
+              <!-- Leader: create announcement → members' mail -->
+              <div
+                class="msg-panel__view"
+                ng-if="alliance.hasAlliance() && alliance.view === 'announce'"
+              >
+                <header class="msg-header">
+                  <button
+                    type="button"
+                    class="msg-back"
+                    aria-label="Back to alliance"
+                    ng-click="alliance.backToMain()"
+                  >
+                    ‹ Back
+                  </button>
+                  <button
+                    type="button"
+                    class="msg-close"
+                    aria-label="Close alliance"
+                    ng-click="game.closeAlliance()"
+                  >
+                    ×
+                  </button>
+                </header>
+                <div class="squad-body">
+                  <h3 class="settings-label">Create announcement</h3>
+                  <p class="move-hint">
+                    Sent to every member’s mail as
+                    <strong>[{{alliance.allianceTag}}]</strong>.
+                  </p>
+                  <textarea
+                    class="alliance-announce-body"
+                    rows="8"
+                    maxlength="400"
+                    placeholder="Write announcement for members…"
+                    ng-model="alliance.announceBody"
+                    aria-label="Announcement message"
+                  ></textarea>
+                  <button
+                    type="button"
+                    class="move-travel-btn move-travel-btn--teleport"
+                    ng-click="alliance.sendAnnounce()"
+                    ng-disabled="!alliance.canSendAnnounce()"
+                  >
+                    Send to mail
+                  </button>
+                  <p class="squad-status" ng-if="alliance.status">{{alliance.status}}</p>
+                </div>
+              </div>
+
+              <!-- Create (no alliance) -->
+              <div class="msg-panel__view" ng-if="!alliance.hasAlliance()">
+                <header class="msg-header">
+                  <h2 class="msg-title">Alliance</h2>
+                  <button
+                    type="button"
+                    class="msg-close"
+                    aria-label="Close alliance"
+                    ng-click="game.closeAlliance()"
+                  >
+                    ×
+                  </button>
+                </header>
+                <div class="squad-body">
+                  <h3 class="settings-label">Create alliance</h3>
+                  <div class="alliance-create-fields">
+                    <input
+                      class="settings-input"
+                      type="text"
+                      maxlength="24"
+                      placeholder="Alliance name"
+                      ng-model="alliance.newName"
+                      aria-label="Alliance name"
+                    />
+                    <div class="settings-row">
+                      <input
+                        class="settings-input alliance-tag-input"
+                        type="text"
+                        maxlength="3"
+                        placeholder="TAG"
+                        ng-model="alliance.newTag"
+                        ng-keyup="$event.keyCode === 13 && alliance.createAlliance()"
+                        aria-label="3-letter acronym"
+                      />
+                      <button
+                        type="button"
+                        class="settings-btn settings-btn--update"
+                        ng-click="alliance.createAlliance()"
+                      >
+                        Create
+                      </button>
+                    </div>
+                  </div>
+                  <p class="move-hint">Acronym must be exactly 3 letters.</p>
+                  <p class="squad-status" ng-if="alliance.status">{{alliance.status}}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats panel (captain username) -->
+        <div
+          class="msg-overlay"
+          ng-if="game.statsOpen"
+          ng-click="game.closeStats()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel stats-panel"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Player stats"
+          >
+            <div class="msg-panel__inner">
+              <header class="msg-header">
+                <h2 class="msg-title">Stats</h2>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Close stats"
+                  ng-click="game.closeStats()"
+                >
+                  ×
+                </button>
+              </header>
+              <div class="squad-body stats-body">
+                <div class="stats-portrait">
+                  <span
+                    class="rank-avatar stats-avatar"
+                    ng-class="{'is-vip': game.statsView().vip}"
+                    aria-hidden="true"
+                  >
+                    <span class="rank-avatar__frame"></span>
+                    <span class="rank-avatar__face"></span>
+                  </span>
+                  <p class="stats-player">{{game.statsView().name}}</p>
+                  <p class="stats-vip-label" ng-if="game.statsView().vip">VIP</p>
+                  <p class="stats-vip-label stats-vip-label--normal" ng-if="!game.statsView().vip">
+                    Standard
+                  </p>
+                </div>
+                <p class="stats-score">
+                  Score
+                  <strong>{{game.statsView().total}}</strong>
+                </p>
+                <ul class="stats-breakdown">
+                  <li class="stats-row">
+                    <span class="stats-row__label">Structures</span>
+                    <span class="stats-row__meta"
+                      >{{game.statsView().structures}} × 10</span
+                    >
+                    <span class="stats-row__pts"
+                      >+{{game.statsView().structurePts}}</span
+                    >
+                  </li>
+                  <li class="stats-row">
+                    <span class="stats-row__label">Fish in squads</span>
+                    <span class="stats-row__meta"
+                      >{{game.statsView().fish}} × 1</span
+                    >
+                    <span class="stats-row__pts"
+                      >+{{game.statsView().fishPts}}</span
+                    >
+                  </li>
+                </ul>
+                <p class="move-hint">
+                  +10 per owned structure · +1 per fish across all squads
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compose message (coral reef Message action) -->
+        <div
+          class="msg-overlay"
+          ng-if="game.composeOpen && game.composeTarget"
+          ng-click="game.closeComposeMessage()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel compose-panel"
+            ng-controller="ComposeMessageCtrl as compose"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Create message"
+          >
+            <div class="msg-panel__inner">
+              <header class="msg-header">
+                <h2 class="msg-title">To {{compose.toName()}}</h2>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Close compose"
+                  ng-click="game.closeComposeMessage()"
+                >
+                  ×
+                </button>
+              </header>
+              <div class="squad-body">
+                <textarea
+                  class="compose-body"
+                  rows="8"
+                  maxlength="400"
+                  placeholder="Write your message…"
+                  ng-model="compose.body"
+                  aria-label="Message body"
+                ></textarea>
+                <button
+                  type="button"
+                  class="move-travel-btn"
+                  ng-click="compose.send()"
+                  ng-disabled="!compose.canSend()"
+                >
+                  Send
+                </button>
+                <p class="squad-status" ng-if="compose.status">{{compose.status}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages modal (Mail) -->
+        <div
+          class="msg-overlay"
+          ng-if="game.mailOpen"
+          ng-click="game.closeMail()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel"
+            ng-controller="MessagesCtrl as mail"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Messages"
+          >
+            <!-- List -->
+            <div class="msg-panel__inner" ng-if="mail.view === 'list'">
+              <header class="msg-header">
+                <h2 class="msg-title">Messages</h2>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Close messages"
+                  ng-click="game.closeMail()"
+                >
+                  ×
+                </button>
+              </header>
+              <ul class="msg-list">
+                <li
+                  class="msg-item"
+                  ng-class="{'is-unread': item.unread, 'is-read': !item.unread}"
+                  ng-repeat="item in mail.items track by item.id"
+                  ng-click="mail.openItem(item)"
+                >
+                  <span
+                    class="msg-unread-dot"
+                    ng-if="item.unread"
+                    aria-hidden="true"
+                  ></span>
+                  <div class="msg-item__top">
+                    <span class="msg-from">{{item.from}}</span>
+                    <span class="msg-time">{{item.time}}</span>
+                  </div>
+                  <p class="msg-preview">{{item.preview}}</p>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Detail -->
+            <div class="msg-panel__inner" ng-if="mail.view === 'detail' && mail.selected">
+              <header class="msg-header">
+                <button
+                  type="button"
+                  class="msg-back"
+                  aria-label="Back to list"
+                  ng-click="mail.backToList()"
+                >
+                  ‹ Back
+                </button>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Close messages"
+                  ng-click="game.closeMail()"
+                >
+                  ×
+                </button>
+              </header>
+              <div class="msg-detail">
+                <div class="msg-detail__meta">
+                  <span class="msg-from">{{mail.selected.from}}</span>
+                  <span class="msg-time">{{mail.selected.time}}</span>
+                </div>
+                <pre class="msg-body">{{mail.selected.body}}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts modal (Bell) -->
+        <div
+          class="msg-overlay"
+          ng-if="game.alertsOpen"
+          ng-click="game.closeAlerts()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel"
+            ng-controller="AlertsCtrl as alerts"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Alerts"
+          >
+            <!-- Territory events list -->
+            <div class="msg-panel__inner" ng-if="alerts.view === 'list'">
+              <header class="msg-header">
+                <h2 class="msg-title">Alerts</h2>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Close alerts"
+                  ng-click="game.closeAlerts()"
+                >
+                  ×
+                </button>
+              </header>
+              <ul class="msg-list">
+                <li
+                  class="msg-item"
+                  ng-class="{'is-unread': item.unread, 'is-read': !item.unread}"
+                  ng-repeat="item in alerts.items track by item.id"
+                  ng-click="alerts.openItem(item)"
+                >
+                  <span
+                    class="msg-unread-dot"
+                    ng-if="item.unread"
+                    aria-hidden="true"
+                  ></span>
+                  <div class="msg-item__top">
+                    <span class="msg-from">{{item.title}}</span>
+                    <span class="msg-time">{{item.time}}</span>
+                  </div>
+                  <p class="msg-preview">{{item.preview}}</p>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Battle Report stub -->
+            <div
+              class="msg-panel__inner"
+              ng-if="alerts.view === 'report' && alerts.selected"
+            >
+              <header class="msg-header">
+                <button
+                  type="button"
+                  class="msg-back"
+                  aria-label="Back to alerts"
+                  ng-click="alerts.backToList()"
+                >
+                  ‹ Back
+                </button>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Close alerts"
+                  ng-click="game.closeAlerts()"
+                >
+                  ×
+                </button>
+              </header>
+              <div class="msg-detail">
+                <h3 class="alert-report-title">{{alerts.selected.reportTitle}}</h3>
+                <p class="alert-report-placeholder">
+                  {{alerts.reportKindLabel(alerts.selected)}}
+                </p>
+                <pre class="msg-body">{{alerts.selected.reportBody}}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings modal (Gear) -->
+        <div
+          class="msg-overlay"
+          ng-if="game.settingsOpen"
+          ng-click="game.closeSettings()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel settings-panel"
+            ng-controller="SettingsCtrl as settings"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Settings"
+          >
+            <div class="msg-panel__inner">
+              <header class="msg-header">
+                <h2 class="msg-title">Settings</h2>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Close settings"
+                  ng-click="game.closeSettings()"
+                >
+                  ×
+                </button>
+              </header>
+
+              <div class="settings-body">
+                <section class="settings-section">
+                  <h3 class="settings-label">Username</h3>
+                  <div class="settings-row">
+                    <input
+                      class="settings-input"
+                      type="text"
+                      maxlength="20"
+                      ng-model="settings.username"
+                      aria-label="Username"
+                    />
+                    <button
+                      type="button"
+                      class="settings-btn settings-btn--update"
+                      ng-click="settings.updateUsername()"
+                    >
+                      Update
+                    </button>
+                  </div>
+                  <p class="settings-hint" ng-if="settings.updatedFlash">
+                    Username updated.
+                  </p>
+                </section>
+
+                <section class="settings-section settings-vip">
+                  <h3 class="settings-label">VIP</h3>
+                  <ul class="settings-vip-list">
+                    <li>+150 resources / tick</li>
+                    <li>VIP profile frame</li>
+                    <li>Lasts 3 months</li>
+                  </ul>
+                  <div class="settings-vip-cta">
+                    <button
+                      type="button"
+                      class="settings-btn settings-btn--vip"
+                      ng-click="settings.upgradeVip()"
+                      ng-disabled="settings.vip"
+                    >
+                      <span class="settings-vip-cta__label">{{
+                        settings.vip ? 'VIP Active' : 'Upgrade to VIP'
+                      }}</span>
+                      <span class="settings-vip-cta__price" ng-if="!settings.vip"
+                        >$1.99</span
+                      >
+                    </button>
+                    <p class="settings-vip-price-note" ng-if="!settings.vip">
+                      One-time · $1.99
+                    </p>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rewards modal (Gift) -->
+        <div
+          class="msg-overlay"
+          ng-if="game.rewardsOpen"
+          ng-click="game.closeRewards()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel rewards-panel"
+            ng-controller="RewardsCtrl as rewards"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Rewards"
+          >
+            <div class="msg-panel__inner">
+              <header class="msg-header">
+                <h2 class="msg-title">Rewards</h2>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Close rewards"
+                  ng-click="game.closeRewards()"
+                >
+                  ×
+                </button>
+              </header>
+
+              <p class="rewards-subtitle">Daily Login</p>
+
+              <ul class="rewards-list">
+                <li
+                  class="reward-row"
+                  ng-repeat="item in rewards.daily track by item.id"
+                  ng-class="{
+                    'is-claimed': item.claimed,
+                    'is-current': item.day === rewards.currentDay && !item.claimed,
+                    'is-missed': rewards.isMissed(item),
+                    'is-locked': rewards.isLocked(item)
+                  }"
+                >
+                  <span class="reward-day">Day {{item.day}}</span>
+                  <span class="reward-sep" aria-hidden="true">—</span>
+                  <span
+                    class="resource-icon reward-res-ico"
+                    ng-class="'resource-icon--' + item.kind"
+                    ng-include="rewards.iconTpl(item.kind)"
+                    aria-hidden="true"
+                  ></span>
+                  <span class="reward-line"
+                    >+{{item.amount}} {{item.label}}</span
+                  >
+                  <span class="reward-sep" aria-hidden="true">—</span>
+                  <button
+                    type="button"
+                    class="reward-claim"
+                    ng-click="rewards.claim(item)"
+                    ng-disabled="!rewards.canClaim(item)"
+                  >
+                    {{ rewards.claimLabel(item) }}
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daily Lucky Spin modal -->
+        <div
+          class="msg-overlay"
+          ng-if="game.spinOpen"
+          ng-click="game.closeSpin()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel spin-panel"
+            ng-controller="SpinCtrl as spin"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Daily Lucky Spin"
+          >
+            <div class="msg-panel__inner">
+              <header class="msg-header">
+                <h2 class="msg-title">Daily Lucky Spin</h2>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Close spin"
+                  ng-click="game.closeSpin()"
+                >
+                  ×
+                </button>
+              </header>
+
+              <div
+                class="spin-body"
+                ng-class="{'spin-body--done': !!spin.result}"
+              >
+                <div class="spin-stage">
+                  <div class="spin-pointer" aria-hidden="true"></div>
+                  <div
+                    class="spin-wheel"
+                    ng-style="spin.wheelStyle()"
+                    ng-class="{
+                      'is-spinning': spin.spinning,
+                      'has-win': !!spin.winId
+                    }"
+                  >
+                    <div class="spin-hub" aria-hidden="true"></div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  class="spin-go"
+                  ng-if="spin.canSpin() && !spin.result"
+                  ng-click="spin.spin()"
+                  ng-disabled="spin.spinning || !spin.canSpin()"
+                >
+                  {{ spin.spinning ? 'Spinning…' : 'Spin' }}
+                </button>
+
+                <p
+                  class="spin-result spin-result--hint"
+                  ng-if="spin.canSpin() && !spin.result && !spin.spinning"
+                >
+                  Tap Spin for today’s prize — one spin per day
+                </p>
+                <p
+                  class="spin-result spin-result--hint"
+                  ng-if="!spin.canSpin() && !spin.spinning"
+                >
+                  Already spun today — come back tomorrow
+                </p>
+
+                <!-- Compact post-spin result (odds list hidden) -->
+                <div class="spin-award" ng-if="spin.result" ng-style="spin.resultStyle()">
+                  <p class="spin-award__eyebrow" ng-if="spin.isReward()">
+                    You won
+                  </p>
+                  <p class="spin-award__eyebrow" ng-if="!spin.isReward()">
+                    Result
+                  </p>
+                  <p class="spin-award__label">{{ spin.result.label }}</p>
+                </div>
+
+                <ul class="spin-odds" ng-if="!spin.result">
+                  <li ng-repeat="p in spin.prizes track by p.id">
+                    <span
+                      class="spin-odds__swatch"
+                      ng-style="{'background': p.color}"
+                    ></span>
+                    <span class="spin-odds__label">{{p.label}}</span>
+                    <span class="spin-odds__pct">{{p.odds}}%</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ranking modal (Trophy) -->
+        <div
+          class="msg-overlay"
+          ng-if="game.rankingOpen"
+          ng-click="game.closeRanking()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel ranking-panel"
+            ng-controller="RankingCtrl as ranking"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Ranking"
+          >
+            <div class="msg-panel__inner">
+              <header class="msg-header">
+                <h2 class="msg-title">Ranking</h2>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Close ranking"
+                  ng-click="game.closeRanking()"
+                >
+                  ×
+                </button>
+              </header>
+
+              <div class="ranking-tabs" role="tablist">
+                <button
+                  type="button"
+                  class="ranking-tab"
+                  role="tab"
+                  ng-class="{'is-active': ranking.tab === 'current'}"
+                  ng-click="ranking.setTab('current')"
+                >
+                  Current Era
+                </button>
+                <button
+                  type="button"
+                  class="ranking-tab"
+                  role="tab"
+                  ng-class="{'is-active': ranking.tab === 'previous'}"
+                  ng-click="ranking.setTab('previous')"
+                >
+                  Previous Era
+                </button>
+              </div>
+
+              <ol class="ranking-list">
+                <li
+                  class="ranking-row"
+                  ng-repeat="p in ranking.activeList() track by (p.name + '-' + ranking.tab)"
+                  ng-class="{'is-top': p.rank === 1, 'is-self': p.isSelf || p.name === game.captain.name}"
+                >
+                  <span class="ranking-place">{{p.rank}}</span>
+                  <span
+                    class="rank-avatar"
+                    ng-class="{'is-vip': p.vip || ((p.isSelf || p.name === game.captain.name) && game.vip)}"
+                    aria-hidden="true"
+                  >
+                    <span class="rank-avatar__frame"></span>
+                    <span class="rank-avatar__face"></span>
+                  </span>
+                  <div class="ranking-who">
+                    <span class="ranking-name">{{p.name}}</span>
+                    <span class="ranking-ally" ng-if="p.alliance"
+                      >[{{p.alliance}}]</span
+                    >
+                  </div>
+                  <span class="ranking-score">{{ranking.formatScore(p.score)}}</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search panel (Magnifier) -->
+        <div
+          class="msg-overlay"
+          ng-if="game.searchOpen"
+          ng-click="game.closeSearch()"
+          role="presentation"
+        >
+          <div
+            class="msg-panel search-panel"
+            ng-controller="SearchCtrl as search"
+            ng-click="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Search"
+          >
+            <div class="msg-panel__inner">
+              <header class="msg-header">
+                <h2 class="msg-title">Search</h2>
+                <button
+                  type="button"
+                  class="msg-close"
+                  aria-label="Close search"
+                  ng-click="game.closeSearch()"
+                >
+                  ×
+                </button>
+              </header>
+              <div class="search-body">
+                <label class="settings-label" for="search-player">Player name</label>
+                <div class="settings-row">
+                  <input
+                    id="search-player"
+                    class="settings-input"
+                    type="text"
+                    maxlength="20"
+                    placeholder="Username"
+                    ng-model="search.query"
+                    ng-keyup="$event.keyCode === 13 && search.go()"
+                    aria-label="Player username"
+                  />
+                  <button
+                    type="button"
+                    class="settings-btn settings-btn--update"
+                    ng-click="search.go()"
+                  >
+                    Go
+                  </button>
+                </div>
+                <p class="search-status" ng-if="search.status">{{search.status}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reused header resource SVGs for Rewards rows -->
+    <script type="text/ng-template" id="reward-icon-scrap.html">
+      <svg class="ico-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 10 L42 8 L48 28 L30 40 L14 30 Z" fill="#8FA8B8" stroke="#162534" stroke-width="3.5" stroke-linejoin="round"/>
+        <path d="M20 13 L39 11 L44 26 L30 36 L17 28 Z" fill="none" stroke="#D5E6F0" stroke-width="1.6" stroke-linejoin="round" opacity="0.9"/>
+        <path d="M22 28 L40 22 L44 28 L30 37 L18 30 Z" fill="none" stroke="#5E7384" stroke-width="1.4" opacity="0.55"/>
+        <circle cx="24" cy="18" r="2.1" fill="#162534"/><circle cx="23.4" cy="17.4" r="0.7" fill="#fff"/>
+        <circle cx="32" cy="16" r="2.1" fill="#162534"/><circle cx="31.4" cy="15.4" r="0.7" fill="#fff"/>
+        <circle cx="40" cy="18" r="2.1" fill="#162534"/><circle cx="39.4" cy="17.4" r="0.7" fill="#fff"/>
+        <circle cx="28" cy="26" r="2.1" fill="#162534"/><circle cx="27.4" cy="25.4" r="0.7" fill="#fff"/>
+        <circle cx="36" cy="28" r="2.1" fill="#162534"/><circle cx="35.4" cy="27.4" r="0.7" fill="#fff"/>
+        <path d="M46 6 L58 10 L54 22 L42 18 Z" fill="#9BB4C4" stroke="#162534" stroke-width="3.2" stroke-linejoin="round"/>
+        <path d="M47.5 9 L55 12 L52 19 L45 16 Z" fill="none" stroke="#E4F1F8" stroke-width="1.3"/>
+        <path d="M8 34 L22 30 L26 42 L16 52 L6 44 Z" fill="#7E98A8" stroke="#162534" stroke-width="3.2" stroke-linejoin="round"/>
+        <path d="M10 36 L20 33 L23 41 L16 48 L9 42 Z" fill="none" stroke="#D0E2EC" stroke-width="1.3"/>
+        <path d="M34 44 L58 38 L60 48 L38 56 Z" fill="#8AA3B4" stroke="#162534" stroke-width="3.2" stroke-linejoin="round"/>
+        <path d="M37 46 L55 41 L56.5 47 L39 52 Z" fill="none" stroke="#D8EAF2" stroke-width="1.3"/>
+      </svg>
+    </script>
+    <script type="text/ng-template" id="reward-icon-flask.html">
+      <svg class="ico-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <g transform="rotate(-18 32 34)">
+          <rect x="26" y="4" width="12" height="8" rx="1.5" fill="#C59B6D" stroke="#162534" stroke-width="3"/>
+          <path d="M27 12 H37 V24 H27 Z" fill="#99C2C8" stroke="#162534" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M29 13 V23" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
+          <path d="M27 24 L14 52 Q12 58 18 58 H46 Q52 58 50 52 L37 24 Z" fill="#99C2C8" stroke="#162534" stroke-width="3.5" stroke-linejoin="round"/>
+          <path d="M18 40 L46 34 L48 52 Q50 56 46 56 H18 Q14 56 16 52 Z" fill="#37FF7E"/>
+          <ellipse cx="32" cy="44" rx="7" ry="5.5" fill="#2D8E52" opacity="0.55"/>
+          <circle cx="28" cy="44" r="1.6" fill="#B8FFD0"/>
+          <circle cx="34" cy="46" r="1.2" fill="#B8FFD0"/>
+          <circle cx="31" cy="41" r="1" fill="#E8FFE8"/>
+          <path d="M22 30 L18 48" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.55"/>
+          <circle cx="31" cy="18" r="1.4" fill="#B8FFD0" stroke="#162534" stroke-width="0.6"/>
+          <circle cx="34" cy="21" r="1.1" fill="#B8FFD0" stroke="#162534" stroke-width="0.6"/>
+          <circle cx="30" cy="22.5" r="0.9" fill="#D4FFE4" stroke="#162534" stroke-width="0.5"/>
+        </g>
+      </svg>
+    </script>
+    <script type="text/ng-template" id="reward-icon-energy.html">
+      <svg class="ico-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="rewardBoltShade" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#FBB03B"/>
+            <stop offset="48%" stop-color="#FBB03B"/>
+            <stop offset="52%" stop-color="#FFD845"/>
+            <stop offset="100%" stop-color="#FFD845"/>
+          </linearGradient>
+          <radialGradient id="rewardBubbleFill" cx="38%" cy="32%" r="68%">
+            <stop offset="0%" stop-color="#A8E9FF"/>
+            <stop offset="55%" stop-color="#76D6FF"/>
+            <stop offset="100%" stop-color="#47B8EB"/>
+          </radialGradient>
+        </defs>
+        <circle cx="32" cy="32" r="26" fill="url(#rewardBubbleFill)" stroke="#162635" stroke-width="4.5"/>
+        <path d="M16 22 Q22 12 36 14" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+        <circle cx="42" cy="44" r="3.5" fill="#5BBFE0" opacity="0.45"/>
+        <path d="M36 10 L22 32 H32 L26 54 L46 28 H34 Z" fill="url(#rewardBoltShade)" stroke="#162635" stroke-width="3.2" stroke-linejoin="round"/>
+      </svg>
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+    <script src="/js/app.js"></script>
+  </body>
+</html>

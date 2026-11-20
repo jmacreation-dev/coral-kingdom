@@ -1,0 +1,123 @@
+// Build panel — coral reef / shell radar / sand tunnel
+
+.build-panel {
+  .msg-panel__inner {
+    max-height: 460px;
+  }
+}
+
+.build-body {
+  padding: 12px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.build-hint {
+  margin: 0;
+  font-family: $font-ui;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(200, 230, 245, 0.75);
+}
+
+.build-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.build-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 0;
+  padding: 8px 10px;
+  border: 2px solid rgba(240, 210, 122, 0.5);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(74, 155, 176, 0.28) 0%, rgba(20, 55, 72, 0.42) 100%);
+  box-shadow:
+    0 0 0 1px rgba(139, 90, 43, 0.35),
+    inset 0 1px 0 rgba(255, 240, 200, 0.16);
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  color: inherit;
+
+  &:active:not(:disabled):not(.is-disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled,
+  &.is-disabled {
+    opacity: 0.42;
+    cursor: default;
+    filter: grayscale(0.35);
+  }
+}
+
+.build-option__lock {
+  font-family: $font-ui;
+  font-size: 10px;
+  font-weight: 800;
+  color: #ffb070;
+}
+
+.build-option__art {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: rgba(8, 28, 40, 0.45) center / contain no-repeat;
+  box-shadow: inset 0 0 0 1px rgba(240, 210, 122, 0.25);
+
+  &--coral-reef {
+    background-image: url('../img/build-coral-reef.png');
+  }
+
+  &--shell-radar {
+    background-image: url('../img/build-shell-radar.png');
+  }
+
+  &--sand-tunnel {
+    background-image: url('../img/build-sand-tunnel.png');
+  }
+}
+
+.build-option__meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.build-option__name {
+  font-family: $font-display;
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff8e8;
+}
+
+.build-option__desc {
+  font-family: $font-ui;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(200, 230, 245, 0.75);
+}
+
+.build-option__cost {
+  font-family: $font-ui;
+  font-size: 10px;
+  font-weight: 800;
+  color: #f0d27a;
+}
+
+.build-hint strong {
+  color: #f0d27a;
+  font-family: $font-display;
+}

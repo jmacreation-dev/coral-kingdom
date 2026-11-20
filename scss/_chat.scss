@@ -1,0 +1,131 @@
+// Chat panel — Global / Alliance feed + compose
+
+.chat-panel {
+  .msg-panel__inner {
+    max-height: 480px;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.chat-panel-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin: 0 12px;
+  border: 2px solid rgba(240, 210, 122, 0.45);
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(10, 35, 50, 0.5);
+}
+
+.chat-panel-tab {
+  height: 34px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(200, 230, 245, 0.65);
+  font-family: $font-display;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  & + & {
+    box-shadow: inset 1px 0 0 rgba(8, 28, 40, 0.4);
+  }
+
+  &.is-active {
+    color: #fff8e8;
+    background: linear-gradient(180deg, #4a9bb0 0%, #2f7a90 100%);
+  }
+}
+
+.chat-feed {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0 14px 8px;
+  flex: 1;
+  min-height: 180px;
+  max-height: 280px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-line {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(74, 155, 176, 0.22) 0%, rgba(20, 55, 72, 0.38) 100%);
+  border: 1px solid rgba(240, 210, 122, 0.28);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chat-line__user {
+  font-family: $font-display;
+  font-size: 11px;
+  font-weight: 800;
+  color: #f0d27a;
+}
+
+.chat-line__text {
+  font-family: $font-ui;
+  font-size: 12px;
+  font-weight: 700;
+  color: #e8f6ff;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.chat-compose {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px 14px;
+  border-top: 1px solid rgba(100, 180, 220, 0.25);
+}
+
+.chat-compose__input {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  border: 2px solid rgba(240, 210, 122, 0.45);
+  border-radius: 999px;
+  background: rgba(8, 30, 44, 0.75);
+  color: #e8f6ff;
+  font-family: $font-ui;
+  font-size: 12px;
+  font-weight: 700;
+  outline: none;
+
+  &::placeholder {
+    color: rgba(180, 210, 230, 0.5);
+  }
+}
+
+.chat-compose__send {
+  flex: 0 0 auto;
+  height: 36px;
+  padding: 0 14px;
+  border: 2px solid #f0d27a;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #4a9bb0 0%, #2f7a90 100%);
+  box-shadow:
+    0 0 0 1px #8b5a2b,
+    inset 0 1px 0 rgba(255, 240, 200, 0.35);
+  color: #fff8e8;
+  font-family: $font-display;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    transform: translateY(1px);
+  }
+}

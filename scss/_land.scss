@@ -1,0 +1,903 @@
+// Continuous solid sand hex field (pointy-top, edge-to-edge) + pan
+
+.land-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  pointer-events: auto;
+
+  &.is-travelling {
+    cursor: crosshair;
+  }
+  // Water beyond the sand island (visible in margins / overscroll)
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(40, 180, 190, 0.35), transparent 55%),
+    radial-gradient(ellipse at 20% 70%, rgba(20, 120, 140, 0.28), transparent 45%),
+    linear-gradient(180deg, $water-light 0%, $water-mid 40%, $water-deep 100%);
+  user-select: none;
+  -webkit-user-select: none;
+
+  &.is-panning {
+    cursor: grabbing;
+  }
+}
+
+.hex-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+  background: transparent;
+}
+
+// Sand underlay clipped to octagon (corners are water)
+.hex-sand-plate {
+  position: absolute;
+  z-index: 0;
+  background: $sand;
+  box-shadow: 0 0 18px rgba(6, 60, 70, 0.28);
+  pointer-events: none;
+}
+
+.hex-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+// Selected empty hex is reparented here so it sits above landmarks
+.hex-select-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 14;
+  pointer-events: none;
+
+  .hex {
+    pointer-events: auto;
+  }
+}
+
+.hex-select-halo {
+  position: absolute;
+  z-index: 13;
+  width: var(--hex-w, 84px);
+  height: var(--hex-h, 96px);
+  pointer-events: none;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  // Soft seaweed-gold ring — no dark/black fringe
+  background: #c6e04a;
+  transform: scale(1.16);
+  transform-origin: center center;
+  opacity: 0.55;
+}
+
+.hex {
+  position: absolute;
+  width: var(--hex-w, 84px);
+  height: var(--hex-h, 96px);
+  // Pointy-top hex — packed with odd-row offset in JS
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  background: linear-gradient(160deg, $sand-light 0%, $sand 42%, $sand-deep 100%);
+  // Soft seam, not a gap
+  box-shadow: inset 0 0 0 1px rgba(180, 130, 50, 0.28);
+  pointer-events: auto;
+  cursor: pointer;
+
+  // Base cell stays in lattice; tint only (front copy carries the glow)
+  &.is-selected {
+    background: linear-gradient(160deg, #ffe07a 0%, #f0c94a 45%, #d4a017 100%);
+    box-shadow: inset 0 0 0 2px #a8c93a;
+  }
+
+  &.has-building {
+    pointer-events: none;
+    cursor: default;
+  }
+}
+
+// Front highlight clone — above landmarks, no black hole underneath
+.hex-select-front {
+  pointer-events: none !important;
+  z-index: 1;
+  transform: scale(1.08);
+  transform-origin: center center;
+  background: linear-gradient(160deg, #ffe07a 0%, #f0c94a 45%, #d4a017 100%);
+  box-shadow: inset 0 0 0 3px #a8c93a;
+  filter: drop-shadow(0 0 6px rgba(168, 201, 58, 0.9));
+}
+
+.hex-structure {
+  position: absolute;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transform: translate(-50%, -62%);
+  pointer-events: none;
+
+  // Selected structure sits above hex highlight / landmarks
+  &.is-front {
+    z-index: 15;
+  }
+}
+
+.hex-building {
+  flex: 0 0 auto;
+  width: 72px;
+  height: 72px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  filter: drop-shadow(0 3px 4px rgba(40, 30, 10, 0.4));
+
+  &--coral-reef {
+    background-image: url('../img/build-coral-reef.png');
+  }
+
+  &--shell-radar {
+    width: 48px;
+    height: 48px;
+    background-image: url('../img/build-shell-radar.png');
+  }
+
+  &--sand-tunnel {
+    width: 48px;
+    height: 48px;
+    background-image: url('../img/build-sand-tunnel.png');
+  }
+}
+
+// Mark highlight: own=white, ally=blue, enemy=red, neutral=orange
+.hex.owner-own {
+  box-shadow:
+    inset 0 0 0 3px #ffffff,
+    inset 0 0 0 1px rgba(180, 130, 50, 0.28);
+}
+
+.hex.owner-ally {
+  box-shadow:
+    inset 0 0 0 3px #3b9eff,
+    inset 0 0 0 1px rgba(180, 130, 50, 0.28);
+}
+
+.hex.owner-enemy {
+  box-shadow:
+    inset 0 0 0 3px #ff4a4a,
+    inset 0 0 0 1px rgba(180, 130, 50, 0.28);
+}
+
+.hex.owner-neutral {
+  box-shadow:
+    inset 0 0 0 3px #ff9830,
+    inset 0 0 0 1px rgba(180, 130, 50, 0.28);
+}
+
+.hex-structure--own .hex-building {
+  filter:
+    drop-shadow(0 0 1px #ffffff)
+    drop-shadow(0 0 3px rgba(255, 255, 255, 0.95))
+    drop-shadow(0 3px 4px rgba(40, 30, 10, 0.4));
+}
+
+.hex-structure--ally .hex-building {
+  filter:
+    drop-shadow(0 0 1px #3b9eff)
+    drop-shadow(0 0 3px rgba(59, 158, 255, 0.95))
+    drop-shadow(0 3px 4px rgba(40, 30, 10, 0.4));
+}
+
+.hex-structure--enemy .hex-building {
+  filter:
+    drop-shadow(0 0 1px #ff4a4a)
+    drop-shadow(0 0 3px rgba(255, 74, 74, 0.95))
+    drop-shadow(0 3px 4px rgba(40, 30, 10, 0.4));
+}
+
+.hex-structure--neutral .hex-building {
+  filter:
+    drop-shadow(0 0 1px #ff9830)
+    drop-shadow(0 0 3px rgba(255, 152, 48, 0.95))
+    drop-shadow(0 3px 4px rgba(40, 30, 10, 0.4));
+}
+
+.hex-structure__name {
+  max-width: 88px;
+  padding: 0 4px;
+  font-family: $font-ui;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #2a2210;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow:
+    0 1px 0 rgba(255, 245, 200, 0.85),
+    0 0 3px rgba(255, 240, 180, 0.7);
+
+  &--player {
+    font-family: $font-display;
+    font-size: 11px;
+    font-weight: 800;
+    color: #1a1408;
+  }
+}
+
+// Build action floating over selected empty hex
+.hex-build-btn {
+  position: absolute;
+  z-index: 16;
+  width: 48px;
+  height: 48px;
+  margin: 0;
+  padding: 0;
+  border: 2px solid #f0d27a;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(180deg, #4a9bb0 0%, #2f7a90 100%);
+  box-shadow:
+    0 0 0 2px #c9a227,
+    0 3px 8px rgba(40, 60, 20, 0.28),
+    inset 0 1px 0 rgba(255, 240, 200, 0.4);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &[hidden] {
+    display: none;
+  }
+
+  &:active {
+    transform: translate(-50%, -50%) scale(0.94);
+  }
+}
+
+.hex-build-ico {
+  display: block;
+  width: 32px;
+  height: 32px;
+  background: url('../img/build-icon.png') center / contain no-repeat;
+}
+
+// Travel preview curve (origin → cursor / pinned cell)
+.hex-travel-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 12; // behind structure action buttons
+  pointer-events: none;
+  overflow: visible;
+
+  &[hidden] {
+    display: none !important;
+  }
+}
+
+.hex-travel-path {
+  fill: none;
+  stroke: #f0d27a;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 10 7;
+  filter: drop-shadow(0 0 4px rgba(240, 210, 122, 0.45));
+
+  // Own / ally ↔ own / ally
+  &.is-move {
+    stroke: #3aa8ff;
+    filter: drop-shadow(0 0 4px rgba(58, 168, 255, 0.55));
+  }
+
+  // Neutral / enemy involved (either end)
+  &.is-attack {
+    stroke: #f0a020;
+    filter: drop-shadow(0 0 4px rgba(240, 160, 32, 0.55));
+  }
+
+  // Sand-tunnel teleport
+  &.is-teleport {
+    stroke: #7ed45a;
+    filter: drop-shadow(0 0 4px rgba(126, 212, 90, 0.55));
+  }
+
+  &.is-committed {
+    stroke-dasharray: 14 8;
+    animation: travel-dash 1.1s linear infinite;
+  }
+
+  &.is-committed.is-move {
+    stroke: #3aa8ff;
+    filter: drop-shadow(0 0 5px rgba(58, 168, 255, 0.65));
+  }
+
+  &.is-committed.is-attack {
+    stroke: #f0a020;
+    filter: drop-shadow(0 0 5px rgba(240, 160, 32, 0.65));
+  }
+
+  &.is-committed.is-teleport {
+    stroke: #7ed45a;
+    filter: drop-shadow(0 0 5px rgba(126, 212, 90, 0.65));
+  }
+}
+
+@keyframes travel-dash {
+  to {
+    stroke-dashoffset: -22;
+  }
+}
+
+.hex-travel-label {
+  font-family: $font-display;
+  font-size: 13px;
+  font-weight: 800;
+  fill: #fff8e8;
+  paint-order: stroke fill;
+  stroke: #1a2b20;
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.hex-travel-squads {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 12; // behind structure action buttons
+  pointer-events: none;
+  overflow: visible;
+}
+
+// Return / travel actions float above the selected stingray
+.hex-travel-actions {
+  position: absolute;
+  z-index: 21;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transform: translate(-50%, -130%);
+  pointer-events: auto;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+// Stingray squad marker — asset faces up; JS rotates toward destination
+.hex-travel-squad {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  pointer-events: none;
+  object-fit: contain;
+  transform-origin: 50% 50%;
+  will-change: transform, left, top;
+  transition:
+    left 0.55s ease-out,
+    top 0.55s ease-out,
+    transform 0.45s ease-out;
+
+  &[hidden] {
+    display: none !important;
+  }
+
+  &.is-enroute {
+    animation: travel-swim 1.4s ease-in-out infinite;
+  }
+
+  &.is-selectable {
+    pointer-events: auto;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  &.is-selected {
+    filter: drop-shadow(0 0 6px rgba(240, 210, 122, 0.95));
+  }
+
+  &.is-pack {
+    width: 64px;
+    height: 64px;
+  }
+
+  &.is-fleet {
+    width: 72px;
+    height: 72px;
+  }
+}
+
+@keyframes travel-swim {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.88;
+  }
+}
+
+// Structure actions (scan / move / profile / message / teleport)
+.hex-actions {
+  position: absolute;
+  z-index: 20; // above travel curves + stingrays
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transform: translate(-50%, -118%);
+  pointer-events: auto;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.hex-action {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border: 2px solid #f0d27a;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #4a9bb0 0%, #2f7a90 100%);
+  box-shadow:
+    0 0 0 2px #c9a227,
+    0 3px 6px rgba(40, 60, 20, 0.28),
+    inset 0 1px 0 rgba(255, 240, 200, 0.35);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+
+  &:active {
+    transform: scale(0.94);
+  }
+
+  &.is-active {
+    border-color: #fff8e8;
+    box-shadow:
+      0 0 0 2px #f0d27a,
+      0 0 10px rgba(240, 210, 122, 0.65),
+      inset 0 1px 0 rgba(255, 240, 200, 0.45);
+  }
+}
+
+.hex-action-ico {
+  position: absolute;
+  inset: 6px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
+  &--scan {
+    background-image: url('../img/action-scan.png');
+  }
+
+  &--move {
+    background-image: url('../img/action-move.png');
+  }
+
+  &--return {
+    background-image: url('../img/action-return.png');
+  }
+
+  &--message {
+    background-image: url('../img/action-message.png');
+  }
+
+  &--teleport {
+    background-image: url('../img/action-teleport.png');
+  }
+
+  // Single reef flag — color swaps with mark (enemy=red, neutral=orange)
+  &--flag {
+    background-image: url('../img/action-flag-neutral.png');
+  }
+
+  &--flag-enemy {
+    background-image: url('../img/action-flag-enemy.png');
+  }
+
+  &--flag-neutral {
+    background-image: url('../img/action-flag-neutral.png');
+  }
+
+  // Simple default profile silhouette
+  &--profile {
+    inset: 8px;
+    background: transparent;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 2px;
+      width: 12px;
+      height: 12px;
+      margin-left: -6px;
+      border-radius: 50%;
+      background: #e8f4fa;
+      box-shadow: 0 0 0 1.5px #1a2b4c;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 13px;
+      width: 18px;
+      height: 11px;
+      margin-left: -9px;
+      border-radius: 9px 9px 3px 3px;
+      background: #e8f4fa;
+      box-shadow: 0 0 0 1.5px #1a2b4c;
+    }
+  }
+}
+
+// Landmarks — percentage of map so they sit near center of 100×100 field
+.landmark {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.landmark--castle {
+  left: 50%;
+  top: 46%;
+  z-index: 8;
+}
+
+.castle {
+  position: relative;
+  width: 64px;
+  height: 58px;
+  filter: drop-shadow(0 3px 3px rgba(120, 80, 30, 0.35));
+}
+
+.castle-base {
+  position: absolute;
+  bottom: 0;
+  left: 6px;
+  width: 52px;
+  height: 28px;
+  background: linear-gradient(180deg, lighten($castle, 8%), $castle-deep);
+  border-radius: 40% 40% 30% 30% / 60% 60% 40% 40%;
+}
+
+.castle-mid {
+  position: absolute;
+  bottom: 18px;
+  left: 14px;
+  width: 36px;
+  height: 22px;
+  background: linear-gradient(180deg, lighten($castle, 12%), $castle);
+  border-radius: 40% 40% 20% 20%;
+}
+
+.castle-top {
+  position: absolute;
+  bottom: 34px;
+  left: 22px;
+  width: 20px;
+  height: 18px;
+  background: linear-gradient(180deg, #5ec4d0, $castle);
+  border-radius: 45% 45% 20% 20%;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    width: 12px;
+    height: 16px;
+    background: $castle-deep;
+    border-radius: 40%;
+  }
+
+  &::before {
+    left: -10px;
+  }
+
+  &::after {
+    right: -10px;
+  }
+}
+
+.castle-window {
+  position: absolute;
+  width: 6px;
+  height: 7px;
+  background: #ffe566;
+  border-radius: 2px;
+  box-shadow: 0 0 6px rgba(255, 230, 100, 0.8);
+
+  &.w1 {
+    bottom: 10px;
+    left: 18px;
+  }
+
+  &.w2 {
+    bottom: 10px;
+    right: 18px;
+  }
+
+  &.w3 {
+    bottom: 28px;
+    left: 29px;
+  }
+}
+
+.landmark--clam {
+  left: 42%;
+  top: 52%;
+}
+
+.landmark--clam-b {
+  left: 58%;
+  top: 56%;
+}
+
+// Pads removed from land (no blue discs); keep class inert if referenced
+.pad {
+  display: none;
+}
+
+.clam {
+  position: absolute;
+  left: 50%;
+  top: 20%;
+  width: 34px;
+  height: 28px;
+  margin-left: -17px;
+}
+
+.clam-shell {
+  position: absolute;
+  left: 0;
+  width: 34px;
+  height: 16px;
+  background: linear-gradient(180deg, lighten($clam, 12%), $clam);
+  border-radius: 50% 50% 40% 40%;
+
+  &--top {
+    top: 0;
+    transform: rotate(-18deg);
+    transform-origin: 50% 100%;
+  }
+
+  &--bot {
+    bottom: 0;
+    border-radius: 40% 40% 50% 50%;
+    background: linear-gradient(0deg, darken($clam, 8%), $clam);
+  }
+}
+
+.pearl {
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, $pearl 55%, #d8cce8);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+  z-index: 1;
+}
+
+.landmark--arch {
+  left: 62%;
+  top: 50%;
+}
+
+.arch {
+  position: relative;
+  width: 40px;
+  height: 36px;
+}
+
+.arch-pillar {
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  height: 28px;
+  background: linear-gradient(90deg, darken($arch, 12%), $arch, darken($arch, 8%));
+  border-radius: 3px;
+
+  &--l {
+    left: 4px;
+  }
+
+  &--r {
+    right: 4px;
+  }
+}
+
+.arch-top {
+  position: absolute;
+  top: 0;
+  left: 2px;
+  right: 2px;
+  height: 16px;
+  border: 8px solid $arch;
+  border-bottom: 0;
+  border-radius: 20px 20px 0 0;
+  background: transparent;
+}
+
+.sandy-path {
+  position: absolute;
+  top: 28px;
+  left: -18px;
+  width: 36px;
+  height: 8px;
+  background: $sand;
+  border-radius: 6px;
+  transform: rotate(-28deg);
+  box-shadow: 10px 8px 0 -1px $sand-deep;
+  opacity: 0.9;
+}
+
+.landmark--crab {
+  left: 46%;
+  top: 58%;
+}
+
+.landmark--crab-b {
+  left: 54%;
+  top: 62%;
+}
+
+.crab {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 28px;
+  height: 24px;
+  margin-left: -14px;
+}
+
+.chest {
+  position: absolute;
+  top: 0;
+  left: 6px;
+  width: 16px;
+  height: 12px;
+  background: linear-gradient(180deg, lighten($chest, 10%), $chest);
+  border-radius: 2px;
+  border: 1px solid darken($chest, 15%);
+  z-index: 2;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #f0d27a;
+  }
+}
+
+.crab-body {
+  position: absolute;
+  bottom: 2px;
+  left: 5px;
+  width: 18px;
+  height: 12px;
+  background: linear-gradient(180deg, lighten($crab, 8%), $crab);
+  border-radius: 50% 50% 40% 40%;
+}
+
+.claw {
+  position: absolute;
+  bottom: 4px;
+  width: 8px;
+  height: 6px;
+  background: $crab;
+  border-radius: 50%;
+
+  &--l {
+    left: 0;
+    transform: rotate(-20deg);
+  }
+
+  &--r {
+    right: 0;
+    transform: rotate(20deg);
+  }
+}
+
+.landmark--manta {
+  z-index: 6;
+  animation: manta-drift 4.5s ease-in-out infinite;
+
+  &.m1 {
+    left: 44%;
+    top: 48%;
+  }
+
+  &.m2 {
+    left: 56%;
+    top: 47%;
+    animation-delay: -1.2s;
+  }
+
+  &.m3 {
+    left: 48%;
+    top: 64%;
+    animation-delay: -2.4s;
+    animation-duration: 5.2s;
+  }
+}
+
+.manta {
+  width: 28px;
+  height: 16px;
+  background: linear-gradient(180deg, lighten($manta, 12%), $manta);
+  clip-path: polygon(
+    0% 50%,
+    18% 28%,
+    42% 40%,
+    50% 18%,
+    58% 40%,
+    82% 22%,
+    100% 50%,
+    82% 78%,
+    58% 60%,
+    50% 82%,
+    42% 60%,
+    18% 72%
+  );
+  filter: drop-shadow(0 2px 2px rgba(120, 80, 30, 0.3));
+}
+
+@keyframes manta-drift {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateX(0) translateY(0);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateX(8px) translateY(-4px);
+  }
+}
+
+.dotted-path {
+  position: absolute;
+  z-index: 4;
+  height: 0;
+  border-top: 2px dashed rgba(180, 130, 50, 0.55);
+  pointer-events: none;
+
+  &--a {
+    left: 46%;
+    top: 54%;
+    width: 90px;
+    transform: rotate(18deg);
+  }
+
+  &--b {
+    left: 50%;
+    top: 58%;
+    width: 70px;
+    transform: rotate(-12deg);
+  }
+}

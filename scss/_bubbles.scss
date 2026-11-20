@@ -1,0 +1,61 @@
+// Rising bubbles — varied size, speed, drift
+
+.bubbles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1; // within .atmosphere
+}
+
+.bubble {
+  position: absolute;
+  bottom: -40px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.55),
+    rgba(180, 230, 240, 0.15) 45%,
+    rgba(120, 200, 220, 0.05) 70%,
+    transparent 72%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: inset -2px -3px 4px rgba(255, 255, 255, 0.25);
+  animation-name: bubble-rise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@for $i from 1 through 12 {
+  $size: 6px + ($i % 5) * 5px;
+  $left: ($i * 8) % 100;
+  $dur: 8s + ($i % 6) * 2.2s;
+  $delay: ($i * 0.7s) % 9s;
+  $drift: -18px + ($i % 4) * 12px;
+
+  .bubble-#{$i} {
+    width: $size;
+    height: $size;
+    left: #{$left + '%'};
+    animation-duration: $dur;
+    animation-delay: $delay;
+    --drift: #{$drift};
+  }
+}
+
+@keyframes bubble-rise {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.7);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.85;
+  }
+  70% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate3d(var(--drift, 10px), -110vh, 0) scale(1.05);
+    opacity: 0;
+  }
+}

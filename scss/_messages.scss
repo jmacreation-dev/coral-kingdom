@@ -1,0 +1,286 @@
+// Messages modal — navy/gold/teal HUD chrome (matches sidebar / nameplate language)
+
+.msg-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 18px 120px;
+  background: rgba(4, 18, 28, 0.55);
+  pointer-events: auto;
+}
+
+.msg-panel {
+  width: 100%;
+  max-width: 320px;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #f0d27a;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #0e2a3c 0%, #0a2030 55%, #071828 100%);
+  box-shadow:
+    0 0 0 2px #8b5a2b,
+    0 10px 28px rgba(0, 12, 24, 0.55),
+    inset 0 1px 0 rgba(255, 240, 200, 0.35),
+    inset 0 2px 0 rgba(120, 190, 220, 0.12);
+  overflow: hidden;
+}
+
+.msg-panel__inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: min(70vh, 520px);
+  overflow: hidden;
+}
+
+// View wrappers (list/create/detail) keep header + body in the height chain
+.msg-panel__view {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.msg-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(240, 210, 122, 0.28);
+  background: linear-gradient(180deg, #4a9bb0 0%, #2f7a90 55%, #256a80 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 200, 0.35),
+    inset 0 -2px 6px rgba(0, 20, 35, 0.35);
+}
+
+.ranking-tabs,
+.rewards-subtitle {
+  flex: 0 0 auto;
+}
+
+// Scrollable panel bodies (mail, squad, move, settings, etc.)
+.msg-list,
+.msg-detail,
+.squad-body,
+.move-body,
+.search-body,
+.spin-body,
+.settings-body,
+.rewards-list,
+.ranking-list,
+.chat-log,
+.radar-body,
+.build-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.msg-title {
+  margin: 0;
+  font-family: $font-display;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff8e8;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.msg-close,
+.msg-back {
+  border: 2px solid #f0d27a;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #2a3c4c 0%, #1a2a38 100%);
+  box-shadow:
+    0 0 0 1px #8b5a2b,
+    inset 0 1px 0 rgba(255, 240, 200, 0.3);
+  color: #fff8e8;
+  font-family: $font-ui;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.msg-close {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 18px;
+  flex: 0 0 auto;
+}
+
+.msg-back {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.msg-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.msg-item {
+  position: relative;
+  padding: 10px 12px 10px 22px;
+  margin-bottom: 8px;
+  border: 2px solid rgba(240, 210, 122, 0.55);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(74, 155, 176, 0.35) 0%, rgba(30, 90, 112, 0.45) 100%);
+  box-shadow:
+    0 0 0 1px rgba(139, 90, 43, 0.45),
+    inset 0 1px 0 rgba(255, 240, 200, 0.2);
+  cursor: pointer;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &.is-unread {
+    border-color: rgba(255, 230, 140, 0.85);
+    background: linear-gradient(180deg, rgba(74, 155, 176, 0.5) 0%, rgba(36, 100, 120, 0.55) 100%);
+
+    .msg-from {
+      font-weight: 800;
+      color: #fffdf0;
+    }
+
+    .msg-preview {
+      font-weight: 700;
+      color: rgba(245, 252, 255, 0.95);
+    }
+  }
+
+  &.is-read {
+    opacity: 0.62;
+    border-color: rgba(240, 210, 122, 0.32);
+    background: linear-gradient(180deg, rgba(40, 80, 96, 0.28) 0%, rgba(20, 50, 64, 0.38) 100%);
+
+    .msg-from {
+      font-weight: 600;
+      color: rgba(230, 240, 248, 0.78);
+    }
+
+    .msg-preview {
+      font-weight: 500;
+      color: rgba(190, 215, 230, 0.7);
+    }
+
+    .msg-time {
+      color: rgba(170, 200, 215, 0.55);
+    }
+  }
+}
+
+.msg-unread-dot {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffe566, #f0a820 70%, #c87810);
+  box-shadow:
+    0 0 0 1.5px #162534,
+    0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.msg-item__top,
+.msg-detail__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.msg-from {
+  font-family: $font-display;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff8e8;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msg-time {
+  flex: 0 0 auto;
+  font-family: $font-ui;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(200, 230, 245, 0.75);
+}
+
+.msg-preview {
+  margin: 0;
+  font-family: $font-ui;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: rgba(220, 240, 250, 0.88);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msg-detail {
+  padding: 12px 14px 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.msg-body {
+  margin: 8px 0 0;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(240, 210, 122, 0.35);
+  background: rgba(8, 28, 40, 0.65);
+  box-shadow: inset 0 1px 0 rgba(180, 230, 245, 0.12);
+  font-family: $font-ui;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #e8f6ff;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.alert-report-title {
+  margin: 0 0 6px;
+  font-family: $font-display;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff8e8;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.alert-report-placeholder {
+  margin: 0 0 4px;
+  font-family: $font-ui;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(200, 230, 245, 0.65);
+}

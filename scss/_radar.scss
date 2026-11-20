@@ -1,0 +1,23 @@
+// Radar panel — moving ally / enemy squads
+
+.radar-panel {
+  .msg-panel__inner {
+    max-height: 440px;
+  }
+}
+
+.radar-row--ally {
+  border-color: rgba(126, 232, 168, 0.45);
+}
+
+.radar-row--enemy {
+  border-color: rgba(232, 120, 120, 0.55);
+}
+
+.squad-state--ally {
+  color: #7ee8a8;
+}
+
+.squad-state--enemy {
+  color: #ff9a8a;
+}

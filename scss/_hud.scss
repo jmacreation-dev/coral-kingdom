@@ -1,0 +1,724 @@
+// Top resources, corners, side buttons, bottom chat/nav
+
+.resource-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  // Main embossed panel: straight top, rounded bottom corners
+  height: 48px;
+  padding: 0;
+  background: linear-gradient(180deg, lighten($hud-bg, 4%) 0%, $hud-bg 45%, $hud-bg-deep 100%);
+  border-radius: 0 0 16px 16px;
+  // Bevel: light top highlight, dark bottom shadow
+  box-shadow:
+    inset 0 1px 0 $hud-highlight,
+    inset 0 2px 0 rgba(120, 180, 210, 0.18),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.45),
+    inset 0 -1px 0 $hud-edge,
+    0 4px 12px rgba(0, 12, 24, 0.4);
+}
+
+.resource-bar__inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 14px;
+  gap: 4px;
+}
+
+.resource {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0;
+  // Flat slots on the panel — no pill chrome (matches blueprint)
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+.resource-value {
+  font-family: $font-display;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.resource-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
+}
+
+.ico-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+// Center hanging panel: wide inverted trapezoid with rounded bottom corners
+.tick-tab {
+  position: absolute;
+  top: calc(100% - 1px);
+  left: 50%;
+  z-index: 1;
+  transform: translateX(-50%);
+  width: 176px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // Path: full-width top flush with bar → taper → rounded bottom corners
+  clip-path: path(
+    'M 0 0 L 176 0 L 162 20 Q 160 30 148 30 L 28 30 Q 16 30 14 20 Z'
+  );
+  background: linear-gradient(
+    180deg,
+    #1a3a4e 0%,
+    $hud-bg 35%,
+    $hud-bg-deep 100%
+  );
+  // Bevel: faint top highlight + bottom shadow (clipped with the shape)
+  box-shadow:
+    inset 0 1px 0 rgba(120, 180, 210, 0.28),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+}
+
+.tick-tab__text {
+  position: relative;
+  z-index: 1;
+  font-family: $font-ui;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+  padding: 0 10px 3px;
+}
+
+.top-corners {
+  position: absolute;
+  top: 86px;
+  left: 10px;
+  right: 10px;
+  z-index: 35;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+}
+
+.captain {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.captain-ring {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #1a2a38;
+  border: 3px solid #f0d27a;
+  box-shadow:
+    0 0 0 2px #8b5a2b,
+    0 6px 14px rgba(0, 20, 40, 0.4),
+    inset 0 1px 0 rgba(255, 230, 160, 0.35),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.shadow-man {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.coral-trim {
+  position: absolute;
+  bottom: 2px;
+  width: 14px;
+  height: 12px;
+  border-radius: 40% 40% 30% 30%;
+  z-index: 3;
+
+  &--l {
+    left: 4px;
+    background: radial-gradient(circle at 40% 40%, #ff8fb8, #e04888);
+  }
+
+  &--r {
+    right: 4px;
+    background: radial-gradient(circle at 40% 40%, #7ec8ff, #3a88cc);
+  }
+}
+
+// Chunky navy/gold nameplate (matches header / sidebar chrome)
+.captain-nameplate {
+  display: block;
+  margin-top: 2px;
+  padding: 5px 12px 6px;
+  border: 2px solid #f0d27a;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #4a9bb0 0%, #2f7a90 45%, #1e5a70 100%);
+  box-shadow:
+    0 0 0 2px #8b5a2b,
+    0 3px 0 #0a1822,
+    0 6px 12px rgba(0, 16, 28, 0.4),
+    inset 0 1px 0 rgba(255, 240, 200, 0.45),
+    inset 0 2px 0 rgba(180, 230, 245, 0.35),
+    inset 0 -3px 6px rgba(0, 20, 35, 0.45);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  pointer-events: auto;
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+.captain-name {
+  display: block;
+  font-family: $font-display;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff8e8;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+}
+
+.minimap-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.minimap-tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 78px;
+  gap: 6px;
+}
+
+// Capsule chrome matching CaptainShelly nameplate (pill radius + gold/bronze/navy bevel)
+.minimap-tool {
+  position: relative;
+  width: 36px;
+  height: 26px;
+  flex: 0 0 36px;
+  padding: 0 6px;
+  border: 2px solid #f0d27a;
+  border-radius: 999px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: $font-ui;
+  -webkit-tap-highlight-color: transparent;
+  // Same teal face as sidebar squircles; gold/bronze pill chrome kept
+  background: linear-gradient(180deg, #4a9bb0 0%, #2f7a90 48%, #256a80 100%);
+  box-shadow:
+    0 0 0 2px #8b5a2b,
+    0 3px 0 #0a1822,
+    0 6px 12px rgba(0, 16, 28, 0.4),
+    inset 0 1px 0 rgba(255, 240, 200, 0.45),
+    inset 0 2px 0 rgba(180, 230, 245, 0.35),
+    inset 0 -3px 6px rgba(0, 20, 35, 0.45);
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow:
+      0 0 0 2px #8b5a2b,
+      0 1px 0 #0a1822,
+      inset 0 1px 0 rgba(255, 240, 200, 0.35),
+      inset 0 -2px 5px rgba(0, 20, 35, 0.55);
+  }
+
+  .side-ico {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.35));
+  }
+}
+
+.minimap {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  padding: 4px;
+  background: linear-gradient(145deg, #f0d27a, #8b5a2b);
+  box-shadow: 0 6px 14px rgba(0, 20, 40, 0.4);
+  // Click-to-jump only — not draggable
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.minimap-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 40%, #1aa0b0, #066070);
+  border: 2px solid rgba(10, 40, 50, 0.45);
+  pointer-events: auto;
+}
+
+// Octagon sand footprint (same cut as land cull / sand plate)
+.minimap-land {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  // Aspect ≈ sandW/sandH (~1.17); sized to leave a thin water ring
+  width: 54px;
+  height: 46px;
+  margin-left: -27px;
+  margin-top: -23px;
+  background: linear-gradient(160deg, $sand-light, $sand 50%, $sand-deep);
+  clip-path: polygon(
+    29.3% 0%,
+    70.7% 0%,
+    100% 29.3%,
+    100% 70.7%,
+    70.7% 100%,
+    29.3% 100%,
+    0% 70.7%,
+    0% 29.3%
+  );
+  box-shadow: inset 0 0 0 1px rgba(180, 130, 50, 0.35);
+}
+
+.minimap-sites {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.minimap-site {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+
+  &--own {
+    background: #ffffff;
+  }
+
+  &--ally {
+    background: #3b9eff;
+  }
+
+  &--enemy {
+    background: #ff4a4a;
+  }
+
+  &--neutral {
+    background: #ff9830;
+  }
+
+  &.is-focus {
+    animation: minimap-site-focus 0.9s ease-out;
+  }
+}
+
+@keyframes minimap-site-focus {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  }
+  35% {
+    transform: scale(2.2);
+    box-shadow:
+      0 0 0 2px #fff8e8,
+      0 0 8px rgba(240, 210, 122, 0.9);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  }
+}
+
+// Edge-to-edge H+V lines (4 segments; gap inside view box)
+.minimap-crosshair {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.minimap-crosshair__v,
+.minimap-crosshair__h {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.minimap-crosshair__v {
+  width: 1px;
+  margin-left: -0.5px;
+}
+
+.minimap-crosshair__h {
+  height: 1px;
+  margin-top: -0.5px;
+}
+
+// Small semi-transparent view box with outline; crosshair clipped out of this area
+.minimap-viewport {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  border-radius: 1px;
+  background: rgba(255, 248, 220, 0.28);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.side-col {
+  position: absolute;
+  // Clearer gap above the Global/Alliance chat strip
+  top: auto;
+  bottom: 155px;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  &--left {
+    left: 8px;
+  }
+
+  &--right {
+    right: 8px;
+  }
+}
+
+// Shared chunky squircle chrome (left + right)
+.side-btn {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  padding: 0;
+  border: 4px solid #162534;
+  border-radius: 16px;
+  cursor: pointer;
+  font-family: $font-ui;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // Teal face: lighter at top
+  background: linear-gradient(180deg, #4a9bb0 0%, #2f7a90 48%, #256a80 100%);
+  box-shadow:
+    // outer depth
+    0 3px 0 #0a1822,
+    0 6px 12px rgba(0, 16, 28, 0.35),
+    // thin light-blue top highlight
+    inset 0 1px 0 rgba(180, 230, 245, 0.65),
+    // corner glow (top-left)
+    inset 2px 2px 4px rgba(160, 220, 240, 0.28),
+    // recessed inset / inner shadow
+    inset 0 -3px 6px rgba(0, 20, 35, 0.45),
+    inset 0 0 0 1px rgba(10, 40, 55, 0.35);
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow:
+      0 1px 0 #0a1822,
+      inset 0 1px 0 rgba(180, 230, 245, 0.45),
+      inset 0 -2px 5px rgba(0, 20, 35, 0.5);
+  }
+}
+
+.side-ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin: 0 auto;
+  position: relative;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.25));
+
+  .ico-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+  }
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  padding: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ff6b5a, #d62828 62%, #a81818);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 18px;
+  text-align: center;
+  border: 2.5px solid #162534;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  z-index: 2;
+
+  &--bang {
+    font-family: $font-display;
+    letter-spacing: 0;
+  }
+}
+
+.bottom-ui {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+}
+
+.chat-strip {
+  background: linear-gradient(180deg, rgba(8, 36, 58, 0.88), rgba(6, 28, 48, 0.95));
+  border-top: 1px solid rgba(100, 180, 220, 0.3);
+  padding: 4px 8px 6px;
+}
+
+.chat-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.chat-tab {
+  border: 0;
+  background: transparent;
+  color: rgba(200, 230, 245, 0.55);
+  font-family: $font-ui;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &.is-active {
+    color: #e8f8ff;
+    background: rgba(40, 100, 140, 0.45);
+  }
+}
+
+.chat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+}
+
+.chat-msg {
+  flex: 1;
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #c8e8f8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chat-open-btn {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(40, 90, 120, 0.45);
+  box-shadow: inset 0 1px 0 rgba(200, 230, 250, 0.2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    filter: brightness(0.92);
+  }
+}
+
+.chat-open-ico {
+  display: block;
+  width: 24px;
+  height: 24px;
+  background: url('../img/chat-icon.png') center / contain no-repeat;
+}
+
+// Classic phone keypad row — flush tiles, hairline seams, rounded bottom outsides
+.main-nav {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin: 0;
+  padding: 0 0 env(safe-area-inset-bottom, 0px);
+  border: 0;
+  overflow: hidden;
+  border-radius: 0 0 22px 22px;
+  background: linear-gradient(180deg, #3a8a9e 0%, #2a6e82 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(200, 235, 250, 0.28),
+    0 -1px 0 rgba(10, 30, 45, 0.45);
+}
+
+.nav-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 58px;
+  padding: 8px 2px 12px;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  cursor: pointer;
+  font-family: $font-display;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #f2f6f8;
+  -webkit-tap-highlight-color: transparent;
+  background: linear-gradient(180deg, #4a9bb0 0%, #357f94 55%, #2c6f84 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -2px 0 rgba(0, 22, 34, 0.22);
+
+  // Hairline seam like * | 0 | # — no layout gap
+  & + &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(8, 28, 40, 0.42);
+    pointer-events: none;
+  }
+
+  // Outer bottom corners match device keypad curve
+  &:first-child {
+    border-radius: 0 0 0 22px;
+  }
+
+  &:last-child {
+    border-radius: 0 0 22px 0;
+  }
+
+  // No selected-color change — keypad keys stay uniform
+  &:active {
+    filter: brightness(0.94);
+  }
+}
+
+.nav-ico {
+  width: 30px;
+  height: 30px;
+  position: relative;
+  flex: 0 0 auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
+  &--radar {
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border-radius: 50%;
+      border: 2.5px solid #9fd8ef;
+      box-shadow:
+        inset 0 0 0 4px rgba(10, 40, 60, 0.35),
+        0 0 0 1px rgba(0, 0, 0, 0.25);
+      background:
+        radial-gradient(circle at 50% 50%, #9fd8ef 0 2px, transparent 2.5px),
+        conic-gradient(from -20deg, rgba(159, 216, 239, 0.55) 0 55deg, transparent 56deg 360deg);
+    }
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 11px;
+      height: 2.5px;
+      margin-top: -1.25px;
+      background: #fff8e0;
+      border-radius: 1px;
+      transform-origin: left center;
+      transform: rotate(-35deg);
+      box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  // Stingray + fish squad art
+  &--squad {
+    width: 36px;
+    height: 28px;
+    background-image: url('../img/nav-squad.png');
+  }
+
+  // Interlocking sea rings
+  &--alliance {
+    width: 30px;
+    height: 30px;
+    background-image: url('../img/nav-alliance.png');
+  }
+}

@@ -1,0 +1,23 @@
+// Search panel — username field + Go
+
+.search-panel {
+  .msg-panel__inner {
+    max-height: 240px;
+  }
+}
+
+.search-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  // overflow comes from shared .msg-panel scroll rules
+}
+
+.search-status {
+  margin: 4px 0 0;
+  font-family: $font-ui;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(200, 230, 245, 0.85);
+}
