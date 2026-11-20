@@ -1233,14 +1233,21 @@
                 </button>
               </header>
               <div class="squad-body">
-                <ul class="squad-list" ng-if="radar.contacts.length">
+                <p class="radar-hint">
+                  Attacks on you &amp; allies · Ally moves to ally / your structures
+                </p>
+                <ul class="squad-list" ng-if="radar.contacts().length">
                   <li
                     class="squad-row"
-                    ng-class="{'radar-row--ally': c.side === 'ally', 'radar-row--enemy': c.side === 'enemy'}"
-                    ng-repeat="c in radar.contacts track by c.id"
+                    ng-class="{
+                      'radar-row--ally': c.side === 'ally',
+                      'radar-row--enemy': c.side === 'enemy'
+                    }"
+                    ng-repeat="c in radar.contacts() track by c.id"
                   >
                     <div class="squad-info">
                       <span class="squad-name">{{c.name}}</span>
+                      <span class="squad-loc" ng-if="c.detail">{{c.detail}}</span>
                       <span
                         class="squad-state"
                         ng-class="c.side === 'enemy' ? 'squad-state--enemy' : 'squad-state--ally'"
@@ -1255,8 +1262,8 @@
                     </button>
                   </li>
                 </ul>
-                <p class="squad-empty" ng-if="!radar.contacts.length">
-                  No moving squads on radar.
+                <p class="squad-empty" ng-if="!radar.contacts().length">
+                  No attacks or ally moves on radar.
                 </p>
                 <p class="squad-status" ng-if="radar.status">{{radar.status}}</p>
               </div>
